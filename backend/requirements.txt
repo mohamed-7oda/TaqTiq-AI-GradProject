@@ -14,5 +14,6 @@ opencv-python
 imutils
 sk-video
 scikit-learn
+ultralytics
 SoccerNet
 matplotlib

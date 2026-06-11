@@ -41,7 +41,8 @@ def _to_python(obj):
     return obj
 
 from huggingface_hub import InferenceClient
-import pyodbc
+import psycopg2
+import psycopg2.extras
 import bcrypt
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
@@ -76,14 +77,7 @@ CLIP_AFTER_SECS    = 7.0   # seconds to include after each event
 HIGHLIGHT_MIN_CONF = 0.50  # minimum confidence to include an event
 MAX_HIGHLIGHT_CLIPS = 40   # cap to avoid extremely long videos
 
-# Windows Authentication. Switch to UID=…;PWD=… for SQL Server login.
-# Change "ODBC Driver 17" → "ODBC Driver 18" if that is what is installed.
-DB_CONN_STR = (
-    "DRIVER={ODBC Driver 17 for SQL Server};"
-    "SERVER=LAPTOP-BQ4FQFIA\\SQLEXPRESS;"
-    "DATABASE=GradProject;"
-    "Trusted_Connection=yes;"
-)
+DATABASE_URL = os.environ.get("DATABASE_URL", "")
 
 # HuggingFace — chatbot
 HF_API_KEY   = os.environ.get("HF_API_KEY", "")
@@ -132,7 +126,7 @@ def check_if_revoked(_jwt_header, jwt_payload):
 
 # ─────────────────────────── DB helper ──────────────────────────────────────
 def get_db():
-    return pyodbc.connect(DB_CONN_STR)
+    return psycopg2.connect(DATABASE_URL)
 
 
 # ─────────────────────────── ML engines ─────────────────────────────────────
@@ -218,7 +212,7 @@ def save_to_history(job_id):
         cursor.execute(
             "INSERT INTO AnalysisHistory "
             "(UserID, JobID, VideoFileName, Mode, TotalEvents, EventCountsJSON, ResultsJSON) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?)",
+            "VALUES (%s, %s, %s, %s, %s, %s, %s)",
             (user_id, job_id, video_filename, mode,
              total_events, event_counts_json, results_json),
         )
@@ -589,13 +583,13 @@ def register():
         cursor = conn.cursor()
         cursor.execute(
             "INSERT INTO Users (FullName, Email, PasswordHash) "
-            "OUTPUT INSERTED.UserID VALUES (?, ?, ?)",
+            "VALUES (%s, %s, %s) RETURNING UserID",
             (full_name, email, password_hash),
         )
         user_id = int(cursor.fetchone()[0])
         conn.commit()
         conn.close()
-    except pyodbc.IntegrityError:
+    except psycopg2.errors.UniqueViolation:
         return jsonify({"error": "Email is already registered"}), 409
     except Exception as e:
         traceback.print_exc()
@@ -621,7 +615,7 @@ def login():
         conn   = get_db()
         cursor = conn.cursor()
         cursor.execute(
-            "SELECT UserID, FullName, Email, PasswordHash FROM Users WHERE Email = ?",
+            "SELECT UserID, FullName, Email, PasswordHash FROM Users WHERE Email = %s",
             (email,),
         )
         row = cursor.fetchone()
@@ -686,7 +680,7 @@ def forgot_password():
     try:
         conn   = get_db()
         cursor = conn.cursor()
-        cursor.execute("SELECT UserID FROM Users WHERE Email = ?", (email,))
+        cursor.execute("SELECT UserID FROM Users WHERE Email = %s", (email,))
         row = cursor.fetchone()
 
         if not row:
@@ -698,9 +692,9 @@ def forgot_password():
         token   = secrets.token_urlsafe(32)
         expires = datetime.now() + timedelta(hours=1)
 
-        cursor.execute("DELETE FROM PasswordResetTokens WHERE UserID = ?", (user_id,))
+        cursor.execute("DELETE FROM PasswordResetTokens WHERE UserID = %s", (user_id,))
         cursor.execute(
-            "INSERT INTO PasswordResetTokens (UserID, Token, ExpiresAt) VALUES (?, ?, ?)",
+            "INSERT INTO PasswordResetTokens (UserID, Token, ExpiresAt) VALUES (%s, %s, %s)",
             (user_id, token, expires),
         )
         conn.commit()
@@ -735,7 +729,7 @@ def reset_password():
         conn   = get_db()
         cursor = conn.cursor()
         cursor.execute(
-            "SELECT UserID, ExpiresAt FROM PasswordResetTokens WHERE Token = ?", (token,)
+            "SELECT UserID, ExpiresAt FROM PasswordResetTokens WHERE Token = %s", (token,)
         )
         row = cursor.fetchone()
 
@@ -745,14 +739,14 @@ def reset_password():
 
         user_id, expires_at = row[0], row[1]
         if datetime.now() > expires_at:
-            cursor.execute("DELETE FROM PasswordResetTokens WHERE Token = ?", (token,))
+            cursor.execute("DELETE FROM PasswordResetTokens WHERE Token = %s", (token,))
             conn.commit()
             conn.close()
             return jsonify({"error": "Reset link has expired. Please request a new one."}), 400
 
         password_hash = bcrypt.hashpw(new_password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
-        cursor.execute("UPDATE Users SET PasswordHash = ? WHERE UserID = ?", (password_hash, user_id))
-        cursor.execute("DELETE FROM PasswordResetTokens WHERE UserID = ?", (user_id,))
+        cursor.execute("UPDATE Users SET PasswordHash = %s WHERE UserID = %s", (password_hash, user_id))
+        cursor.execute("DELETE FROM PasswordResetTokens WHERE UserID = %s", (user_id,))
         conn.commit()
         conn.close()
         print(f"[Auth] Password reset successfully for user {user_id}")
@@ -771,7 +765,7 @@ def me():
         conn   = get_db()
         cursor = conn.cursor()
         cursor.execute(
-            "SELECT UserID, FullName, Email FROM Users WHERE UserID = ?", (user_id,)
+            "SELECT UserID, FullName, Email FROM Users WHERE UserID = %s", (user_id,)
         )
         row = cursor.fetchone()
         conn.close()
@@ -797,7 +791,7 @@ def get_profile():
             "  p.Organization, p.Role, p.Bio, p.UpdatedAt "
             "FROM Users u "
             "LEFT JOIN UserProfiles p ON u.UserID = p.UserID "
-            "WHERE u.UserID = ?",
+            "WHERE u.UserID = %s",
             (user_id,),
         )
         row = cursor.fetchone()
@@ -845,26 +839,26 @@ def update_profile():
 
         if full_name:
             cursor.execute(
-                "UPDATE Users SET FullName = ? WHERE UserID = ?",
+                "UPDATE Users SET FullName = %s WHERE UserID = %s",
                 (full_name, user_id),
             )
 
         cursor.execute(
-            "SELECT ProfileID FROM UserProfiles WHERE UserID = ?", (user_id,)
+            "SELECT ProfileID FROM UserProfiles WHERE UserID = %s", (user_id,)
         )
         if cursor.fetchone():
             cursor.execute(
                 "UPDATE UserProfiles "
-                "SET PhoneNumber=?, DateOfBirth=?, Country=?, City=?, "
-                "    Organization=?, Role=?, Bio=?, UpdatedAt=GETDATE() "
-                "WHERE UserID=?",
+                "SET PhoneNumber=%s, DateOfBirth=%s, Country=%s, City=%s, "
+                "    Organization=%s, Role=%s, Bio=%s, UpdatedAt=NOW() "
+                "WHERE UserID=%s",
                 (phone, dob, country, city, org, role, bio, user_id),
             )
         else:
             cursor.execute(
                 "INSERT INTO UserProfiles "
                 "(UserID, PhoneNumber, DateOfBirth, Country, City, Organization, Role, Bio) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
                 (user_id, phone, dob, country, city, org, role, bio),
             )
 
@@ -888,14 +882,14 @@ def get_history():
             "SELECT HistoryID, JobID, VideoFileName, Mode, TotalEvents, "
             "       EventCountsJSON, AnalyzedAt "
             "FROM AnalysisHistory "
-            "WHERE UserID = ? "
+            "WHERE UserID = %s "
             "ORDER BY AnalyzedAt DESC",
             (user_id,),
         )
         rows = cursor.fetchall()
         cursor.execute(
             "SELECT HistoryID, TagID, Label FROM AnalysisTags "
-            "WHERE UserID = ? ORDER BY CreatedAt",
+            "WHERE UserID = %s ORDER BY CreatedAt",
             (user_id,),
         )
         tag_rows = cursor.fetchall()
@@ -934,7 +928,7 @@ def history_item(history_id):
             conn   = get_db()
             cursor = conn.cursor()
             cursor.execute(
-                "DELETE FROM AnalysisHistory WHERE HistoryID = ? AND UserID = ?",
+                "DELETE FROM AnalysisHistory WHERE HistoryID = %s AND UserID = %s",
                 (history_id, user_id),
             )
             deleted = cursor.rowcount
@@ -956,7 +950,7 @@ def history_item(history_id):
             "SELECT HistoryID, JobID, VideoFileName, Mode, TotalEvents, "
             "       EventCountsJSON, ResultsJSON, AnalyzedAt "
             "FROM AnalysisHistory "
-            "WHERE HistoryID = ? AND UserID = ?",
+            "WHERE HistoryID = %s AND UserID = %s",
             (history_id, user_id),
         )
         r = cursor.fetchone()
@@ -994,7 +988,7 @@ def history_tags(history_id):
             conn   = get_db()
             cursor = conn.cursor()
             cursor.execute(
-                "SELECT 1 FROM AnalysisHistory WHERE HistoryID=? AND UserID=?",
+                "SELECT 1 FROM AnalysisHistory WHERE HistoryID=%s AND UserID=%s",
                 (history_id, user_id),
             )
             if not cursor.fetchone():
@@ -1002,7 +996,7 @@ def history_tags(history_id):
                 return jsonify({"error": "Not found"}), 404
             cursor.execute(
                 "INSERT INTO AnalysisTags (UserID, HistoryID, Label) "
-                "OUTPUT INSERTED.TagID, INSERTED.CreatedAt VALUES (?, ?, ?)",
+                "VALUES (%s, %s, %s) RETURNING TagID, CreatedAt",
                 (user_id, history_id, label),
             )
             row = cursor.fetchone()
@@ -1025,7 +1019,7 @@ def history_tags(history_id):
         cursor = conn.cursor()
         cursor.execute(
             "SELECT TagID, Label, CreatedAt FROM AnalysisTags "
-            "WHERE HistoryID=? AND UserID=? ORDER BY CreatedAt",
+            "WHERE HistoryID=%s AND UserID=%s ORDER BY CreatedAt",
             (history_id, user_id),
         )
         rows = cursor.fetchall()
@@ -1048,7 +1042,7 @@ def delete_history_tag(history_id, tag_id):
         conn   = get_db()
         cursor = conn.cursor()
         cursor.execute(
-            "DELETE FROM AnalysisTags WHERE TagID=? AND HistoryID=? AND UserID=?",
+            "DELETE FROM AnalysisTags WHERE TagID=%s AND HistoryID=%s AND UserID=%s",
             (tag_id, history_id, user_id),
         )
         deleted = cursor.rowcount
@@ -1076,7 +1070,7 @@ def history_notes(history_id):
             conn   = get_db()
             cursor = conn.cursor()
             cursor.execute(
-                "SELECT 1 FROM AnalysisHistory WHERE HistoryID=? AND UserID=?",
+                "SELECT 1 FROM AnalysisHistory WHERE HistoryID=%s AND UserID=%s",
                 (history_id, user_id),
             )
             if not cursor.fetchone():
@@ -1084,7 +1078,7 @@ def history_notes(history_id):
                 return jsonify({"error": "Not found"}), 404
             cursor.execute(
                 "INSERT INTO MatchNotes (HistoryID, UserID, NoteText) "
-                "OUTPUT INSERTED.NoteID, INSERTED.CreatedAt VALUES (?, ?, ?)",
+                "VALUES (%s, %s, %s) RETURNING NoteID, CreatedAt",
                 (history_id, user_id, note_text),
             )
             row = cursor.fetchone()
@@ -1107,7 +1101,7 @@ def history_notes(history_id):
         cursor = conn.cursor()
         cursor.execute(
             "SELECT NoteID, NoteText, CreatedAt, UpdatedAt FROM MatchNotes "
-            "WHERE HistoryID=? AND UserID=? ORDER BY CreatedAt",
+            "WHERE HistoryID=%s AND UserID=%s ORDER BY CreatedAt",
             (history_id, user_id),
         )
         rows = cursor.fetchall()
@@ -1132,7 +1126,7 @@ def history_note(history_id, note_id):
             conn   = get_db()
             cursor = conn.cursor()
             cursor.execute(
-                "DELETE FROM MatchNotes WHERE NoteID=? AND HistoryID=? AND UserID=?",
+                "DELETE FROM MatchNotes WHERE NoteID=%s AND HistoryID=%s AND UserID=%s",
                 (note_id, history_id, user_id),
             )
             deleted = cursor.rowcount
@@ -1154,9 +1148,9 @@ def history_note(history_id, note_id):
         conn   = get_db()
         cursor = conn.cursor()
         cursor.execute(
-            "UPDATE MatchNotes SET NoteText=?, UpdatedAt=GETDATE() "
-            "OUTPUT INSERTED.UpdatedAt "
-            "WHERE NoteID=? AND HistoryID=? AND UserID=?",
+            "UPDATE MatchNotes SET NoteText=%s, UpdatedAt=NOW() "
+            "WHERE NoteID=%s AND HistoryID=%s AND UserID=%s "
+            "RETURNING UpdatedAt",
             (note_text, note_id, history_id, user_id),
         )
         row = cursor.fetchone()

@@ -15,7 +15,7 @@ import torch
 
 # Add the inference folder to Python path so we can import its modules
 HERE = os.path.dirname(os.path.abspath(__file__))
-INFERENCE_DIR = os.path.join(HERE, "inference")
+INFERENCE_DIR = os.path.join(HERE, "Inference")
 sys.path.insert(0, INFERENCE_DIR)
 
 from model import ContextAwareModel

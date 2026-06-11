@@ -11,4 +11,4 @@ if [ ! -f "$MODEL_PATH" ]; then
     echo "Model downloaded."
 fi
 
-exec gunicorn --bind 0.0.0.0:5000 --timeout 600 --workers 1 server:app
+exec gunicorn --bind 0.0.0.0:7860 --timeout 600 --workers 1 server:app

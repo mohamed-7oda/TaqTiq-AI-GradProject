@@ -1,0 +1,61 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environment
+venv/
+env/
+.venv/
+
+# Environment variables (secrets!)
+.env
+*.env
+.env.*
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# ML Models (too large for GitHub)
+backend/Tracking/models/*.pt
+backend/Tracking/models/*.pth
+backend/Tracking/models/*.onnx
+backend/Inference/models/*.pt
+backend/Inference/models/*.pth
+
+# Uploaded and processed videos
+backend/uploads/
+backend/results/
+
+# Node
+node_modules/
+frontend/node_modules/
+
+# Build output
+frontend/build/
+frontend/dist/
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Stubs / cache
+backend/Tracking/stubs/
+*.npy

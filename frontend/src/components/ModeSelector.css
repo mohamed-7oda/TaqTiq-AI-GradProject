@@ -1,0 +1,100 @@
+.mode-selector {
+  max-width: 860px;
+  margin: 0 auto 2rem;
+}
+
+.mode-title {
+  text-align: center;
+  font-size: 1.2rem;
+  margin-bottom: 1.1rem;
+  color: #e2e8f0;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.mode-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.mode-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 1.6rem 1.5rem;
+  cursor: pointer;
+  color: #94a3b8;
+  transition: all 0.22s ease;
+  text-align: left;
+  font-family: inherit;
+}
+
+.mode-card:hover {
+  border-color: rgba(99, 102, 241, 0.5);
+  background: rgba(99, 102, 241, 0.05);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.12);
+}
+
+.mode-card.active {
+  border-color: #6366f1;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.18), rgba(139, 92, 246, 0.12));
+  box-shadow: 0 0 26px rgba(99, 102, 241, 0.22);
+}
+
+.mode-card.tracking:hover {
+  border-color: rgba(236, 72, 153, 0.5);
+  background: rgba(236, 72, 153, 0.05);
+  box-shadow: 0 4px 20px rgba(236, 72, 153, 0.1);
+}
+
+.mode-card.tracking.active {
+  border-color: #ec4899;
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.18), rgba(139, 92, 246, 0.12));
+  box-shadow: 0 0 26px rgba(236, 72, 153, 0.2);
+}
+
+.mode-icon {
+  font-size: 2.2rem;
+  margin-bottom: 0.75rem;
+  display: block;
+}
+
+.mode-card h3 {
+  color: #f1f5f9;
+  font-size: 1.1rem;
+  margin: 0 0 0.45rem;
+  font-weight: 600;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.mode-card p {
+  font-size: 0.87rem;
+  line-height: 1.55;
+  margin: 0 0 1rem;
+  color: #64748b;
+}
+
+.mode-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  padding: 0.25rem 0.65rem;
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: 999px;
+  color: #a5b4fc;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.mode-card.tracking .mode-badge {
+  background: rgba(236, 72, 153, 0.15);
+  border-color: rgba(236, 72, 153, 0.3);
+  color: #f9a8d4;
+}
+
+@media (max-width: 640px) {
+  .mode-cards { grid-template-columns: 1fr; }
+}

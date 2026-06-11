@@ -15,5 +15,7 @@ imutils
 sk-video
 scikit-learn
 ultralytics
+supervision
+pandas
 SoccerNet
 matplotlib

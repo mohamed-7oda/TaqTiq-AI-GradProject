@@ -816,10 +816,12 @@ export default function MatchDashboard({ results }) {
   const s2 = useMemo(() => getTeamStats(events, "Team 2"), [events]);
 
   const JERSEY_HEX = { red:"#cc2200",blue:"#1144cc",green:"#15803d",white:"#e2e8f0",black:"#334155",yellow:"#eab308",orange:"#f97316",purple:"#8b5cf6",pink:"#ec4899",gray:"#6b7280",grey:"#6b7280",navy:"#1e3a8a",maroon:"#991b1b",cyan:"#06b6d4",teal:"#0d9488" };
-  const c1 = teamColors?.team1?.hex || JERSEY_HEX[teamColors?.team1?.name?.toLowerCase()] || "#ef4444";
-  const c2 = teamColors?.team2?.hex || JERSEY_HEX[teamColors?.team2?.name?.toLowerCase()] || "#3b82f6";
-  const n1 = teamColors?.team1?.name ? teamColors.team1.name.charAt(0).toUpperCase() + teamColors.team1.name.slice(1) : "unknown";
-  const n2 = teamColors?.team2?.name ? teamColors.team2.name.charAt(0).toUpperCase() + teamColors.team2.name.slice(1) : "unknown";
+  const cleanColor = (name) => name?.toLowerCase().replace(/[^a-z]/g, "") || "";
+  const c1 = teamColors?.team1?.hex || JERSEY_HEX[cleanColor(teamColors?.team1?.name)] || "#ef4444";
+  const c2 = teamColors?.team2?.hex || JERSEY_HEX[cleanColor(teamColors?.team2?.name)] || "#3b82f6";
+  const cleanName = (name) => name ? name.replace(/[^a-zA-Z\s]/g, "").trim() : "unknown";
+  const n1 = cleanName(teamColors?.team1?.name);
+  const n2 = cleanName(teamColors?.team2?.name);
 
   const hasH2 = events.some(e => e.half === 2);
   const hasTeams = s1.total > 0 || s2.total > 0;

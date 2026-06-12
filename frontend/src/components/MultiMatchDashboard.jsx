@@ -1050,8 +1050,9 @@ function TeamsTab({ matches }) {
     const tot  = off1 + off2 || 1;
     const JERSEY_HEX = { red:"#cc2200",blue:"#1144cc",green:"#15803d",white:"#e2e8f0",black:"#334155",yellow:"#eab308",orange:"#f97316",purple:"#8b5cf6",pink:"#ec4899",gray:"#6b7280",grey:"#6b7280",navy:"#1e3a8a",maroon:"#991b1b",cyan:"#06b6d4",teal:"#0d9488" };
     const tc = m.team_colors;
-    s1.color = tc?.team1?.hex || JERSEY_HEX[tc?.team1?.name?.toLowerCase()] || s1.color;
-    s2.color = tc?.team2?.hex || JERSEY_HEX[tc?.team2?.name?.toLowerCase()] || s2.color;
+    const cleanColor = (name) => name?.toLowerCase().replace(/[^a-z]/g, "") || "";
+    s1.color = tc?.team1?.hex || JERSEY_HEX[cleanColor(tc?.team1?.name)] || s1.color;
+    s2.color = tc?.team2?.hex || JERSEY_HEX[cleanColor(tc?.team2?.name)] || s2.color;
     return { ...m, s1, s2, dom1: Math.round(off1/tot*100), dom2: Math.round(off2/tot*100) };
   }), [matches]);
 

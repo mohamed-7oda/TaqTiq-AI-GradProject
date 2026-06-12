@@ -6,8 +6,8 @@ export default function TrackingResult({ apiUrl, results, onReset }) {
   const { stats = {}, video_url, id, video_filename, report_url } = results || {};
   const videoSrc = `${apiUrl}${video_url}`;
 
-  const c1 = stats.team1_color || "#60a5fa";
-  const c2 = stats.team2_color || "#f472b6";
+  const c1 = "#ef4444";
+  const c2 = "#3b82f6";
 
   return (
     <div className="tracking-result">

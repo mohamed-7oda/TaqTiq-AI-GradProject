@@ -487,7 +487,7 @@ function ScoreBoard({ s1, s2, c1, c2, n1, n2 }) {
       <div className="sb-team">
         <span className="sb-dot" style={{ background: c1 }} />
         <span style={{ color: c1 }}>Team 1</span>
-        <span className="sb-name">{n1}</span>
+        {n1 && n1 !== "unknown" && <span className="sb-jersey">{n1} jersey</span>}
       </div>
       <div className="sb-score">
         <span style={{ color: c1 }}>{s1.goals}</span>
@@ -495,7 +495,7 @@ function ScoreBoard({ s1, s2, c1, c2, n1, n2 }) {
         <span style={{ color: c2 }}>{s2.goals}</span>
       </div>
       <div className="sb-team sb-team-right">
-        <span className="sb-name">{n2}</span>
+        {n2 && n2 !== "unknown" && <span className="sb-jersey">{n2} jersey</span>}
         <span style={{ color: c2 }}>Team 2</span>
         <span className="sb-dot" style={{ background: c2 }} />
       </div>
@@ -816,9 +816,8 @@ export default function MatchDashboard({ results }) {
   const s2 = useMemo(() => getTeamStats(events, "Team 2"), [events]);
 
   const JERSEY_HEX = { red:"#cc2200",blue:"#1144cc",green:"#15803d",white:"#e2e8f0",black:"#334155",yellow:"#eab308",orange:"#f97316",purple:"#8b5cf6",pink:"#ec4899",gray:"#6b7280",grey:"#6b7280",navy:"#1e3a8a",maroon:"#991b1b",cyan:"#06b6d4",teal:"#0d9488" };
-  const cleanColor = (name) => name?.toLowerCase().replace(/[^a-z]/g, "") || "";
-  const c1 = teamColors?.team1?.hex || JERSEY_HEX[cleanColor(teamColors?.team1?.name)] || "#ef4444";
-  const c2 = teamColors?.team2?.hex || JERSEY_HEX[cleanColor(teamColors?.team2?.name)] || "#3b82f6";
+  const c1 = "#ef4444";
+  const c2 = "#3b82f6";
   const cleanName = (name) => name ? name.replace(/[^a-zA-Z\s]/g, "").trim() : "unknown";
   const n1 = cleanName(teamColors?.team1?.name);
   const n2 = cleanName(teamColors?.team2?.name);
@@ -1193,6 +1192,7 @@ export default function MatchDashboard({ results }) {
         .sb-team-right { flex-direction:row-reverse; }
         .sb-dot { width:12px; height:12px; border-radius:50%; flex-shrink:0; }
         .sb-name { color:#64748b; font-size:0.78rem; }
+        .sb-jersey { color:#94a3b8; font-size:0.72rem; background:rgba(255,255,255,0.06); border-radius:6px; padding:1px 6px; }
         .sb-score { display:flex; align-items:center; gap:0.75rem; font-size:2.2rem; font-weight:800; letter-spacing:-0.02em; }
         .sb-dash { color:#334155; font-weight:300; }
 

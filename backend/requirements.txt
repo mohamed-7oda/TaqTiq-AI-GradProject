@@ -17,5 +17,6 @@ scikit-learn
 ultralytics
 supervision
 pandas
+moviepy
 SoccerNet
 matplotlib

@@ -74,6 +74,24 @@ function VideoUpload({ apiUrl, mode, token, onUploadStart, onUploadSuccess, onUp
     <div className="upload-container">
       <div className="mode-hint">{headerSubtitle}</div>
 
+      <div className="upload-notes">
+        <div className="upload-note">
+          <span className="note-icon">⏱️</span>
+          <span>Processing will take some time to complete — please keep this page open.</span>
+        </div>
+        {isTracking ? (
+          <div className="upload-note">
+            <span className="note-icon">📐</span>
+            <span>For best results, upload a video between <strong>30 seconds and 1 minute</strong> long.</span>
+          </div>
+        ) : (
+          <div className="upload-note">
+            <span className="note-icon">🎬</span>
+            <span>For best results, upload a match video <strong>longer than 30 minutes</strong>.</span>
+          </div>
+        )}
+      </div>
+
       <div
         className={`drop-zone ${file ? "has-file" : ""} ${isDragging ? "dragging" : ""} ${isTracking ? "tracking-mode" : ""}`}
         onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
@@ -165,6 +183,30 @@ function VideoUpload({ apiUrl, mode, token, onUploadStart, onUploadSuccess, onUp
 
       <style>{`
         .upload-container { max-width: 720px; margin: 0 auto; }
+
+        .upload-notes {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+          margin-bottom: 1.5rem;
+        }
+
+        .upload-note {
+          display: flex;
+          align-items: center;
+          gap: 0.6rem;
+          background: rgba(251, 191, 36, 0.07);
+          border: 1px solid rgba(251, 191, 36, 0.2);
+          border-radius: 10px;
+          padding: 0.6rem 1rem;
+          color: #fcd34d;
+          font-size: 0.84rem;
+          line-height: 1.4;
+        }
+
+        .upload-note strong { color: #fef08a; }
+
+        .note-icon { font-size: 1rem; flex-shrink: 0; }
 
         .mode-hint {
           text-align: center;

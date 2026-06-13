@@ -29,6 +29,11 @@ export default function Profile() {
   const [success,  setSuccess]  = useState("");
   const [error,    setError]    = useState("");
 
+  const [pwForm,    setPwForm]    = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
+  const [pwSaving,  setPwSaving]  = useState(false);
+  const [pwSuccess, setPwSuccess] = useState("");
+  const [pwError,   setPwError]   = useState("");
+
   useEffect(() => {
     axios
       .get(`${API_URL}/api/profile`, { headers: { Authorization: `Bearer ${token}` } })
@@ -53,6 +58,33 @@ export default function Profile() {
 
   const set = (key) => (e) =>
     setForm((f) => ({ ...f, [key]: e.target.value }));
+
+  const setPw = (key) => (e) =>
+    setPwForm((f) => ({ ...f, [key]: e.target.value }));
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    setPwSuccess(""); setPwError("");
+    if (pwForm.newPassword !== pwForm.confirmPassword) {
+      setPwError("New passwords do not match."); return;
+    }
+    if (pwForm.newPassword.length < 6) {
+      setPwError("New password must be at least 6 characters."); return;
+    }
+    setPwSaving(true);
+    try {
+      await axios.post(`${API_URL}/api/auth/change-password`,
+        { currentPassword: pwForm.currentPassword, newPassword: pwForm.newPassword },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setPwSuccess("Password changed successfully.");
+      setPwForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+    } catch (err) {
+      setPwError(err.response?.data?.error || "Failed to change password.");
+    } finally {
+      setPwSaving(false);
+    }
+  };
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -169,6 +201,33 @@ export default function Profile() {
 
         <button type="submit" className="pf-save-btn" disabled={saving}>
           {saving ? <span className="btn-spinner" /> : "Save Changes"}
+        </button>
+      </form>
+
+      {/* ── Change Password ── */}
+      <form onSubmit={handleChangePassword} className="pf-form" style={{ marginTop: "1.25rem" }}>
+        <section className="pf-section">
+          <h3 className="pf-section-title">Change Password</h3>
+          <div className="pf-grid-2">
+            <Field label="Current Password">
+              <input className="pf-input" type="password" value={pwForm.currentPassword}
+                onChange={setPw("currentPassword")} placeholder="Enter current password" autoComplete="current-password" />
+            </Field>
+            <div />
+            <Field label="New Password">
+              <input className="pf-input" type="password" value={pwForm.newPassword}
+                onChange={setPw("newPassword")} placeholder="At least 6 characters" autoComplete="new-password" />
+            </Field>
+            <Field label="Confirm New Password">
+              <input className="pf-input" type="password" value={pwForm.confirmPassword}
+                onChange={setPw("confirmPassword")} placeholder="Repeat new password" autoComplete="new-password" />
+            </Field>
+          </div>
+          {pwError   && <div className="pf-msg pf-msg-error" style={{ marginTop: "1rem" }}>{pwError}</div>}
+          {pwSuccess && <div className="pf-msg pf-msg-success" style={{ marginTop: "1rem" }}>{pwSuccess}</div>}
+        </section>
+        <button type="submit" className="pf-save-btn" disabled={pwSaving}>
+          {pwSaving ? <span className="btn-spinner" /> : "Change Password"}
         </button>
       </form>
 

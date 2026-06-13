@@ -799,6 +799,43 @@ def reset_password():
     return jsonify({"message": "Password reset successfully. You can now sign in."}), 200
 
 
+@app.route("/api/auth/change-password", methods=["POST"])
+@jwt_required()
+def change_password():
+    user_id = get_jwt_identity()
+    data = request.get_json(silent=True) or {}
+    current_password = data.get("currentPassword", "")
+    new_password     = data.get("newPassword", "")
+
+    if not current_password or not new_password:
+        return jsonify({"error": "Both current and new password are required"}), 400
+    if len(new_password) < 6:
+        return jsonify({"error": "New password must be at least 6 characters"}), 400
+
+    try:
+        conn   = get_db()
+        cursor = conn.cursor()
+        cursor.execute("SELECT PasswordHash FROM Users WHERE UserID = %s", (user_id,))
+        row = cursor.fetchone()
+        if not row:
+            conn.close()
+            return jsonify({"error": "User not found"}), 404
+
+        if not bcrypt.checkpw(current_password.encode("utf-8"), row[0].encode("utf-8")):
+            conn.close()
+            return jsonify({"error": "Current password is incorrect"}), 400
+
+        new_hash = bcrypt.hashpw(new_password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+        cursor.execute("UPDATE Users SET PasswordHash = %s WHERE UserID = %s", (new_hash, user_id))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"error": f"Database error: {e}"}), 500
+
+    return jsonify({"message": "Password changed successfully"}), 200
+
+
 @app.route("/api/auth/me", methods=["GET"])
 @jwt_required()
 def me():

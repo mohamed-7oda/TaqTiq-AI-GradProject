@@ -672,15 +672,12 @@ def logout():
 
 
 # ─── Password reset helpers ───────────────────────────────────────────────────
-def _send_reset_email(to_email: str, reset_url: str):
-    msg = MIMEMultipart("alternative")
-    msg["Subject"] = "Reset Your Password — Soccer Analytics"
-    msg["From"]    = EMAIL_USER
-    msg["To"]      = to_email
+SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY", "")
 
+def _send_reset_email(to_email: str, reset_url: str):
     html = f"""
     <div style="font-family:sans-serif;background:#0f172a;color:#f1f5f9;padding:40px;max-width:520px;margin:auto;border-radius:16px;">
-      <h2 style="margin:0 0 8px;">⚽ Soccer Analytics</h2>
+      <h2 style="margin:0 0 8px;">&#x26BD; TaqTiq AI</h2>
       <p style="color:#94a3b8;margin:0 0 24px;">Password Reset Request</p>
       <p>We received a request to reset your password. Click the button below — this link expires in <strong>1 hour</strong>.</p>
       <a href="{reset_url}"
@@ -689,24 +686,29 @@ def _send_reset_email(to_email: str, reset_url: str):
       </a>
       <p style="color:#64748b;font-size:0.85rem;">If you didn't request this, you can safely ignore this email. Your password will not change.</p>
       <hr style="border:none;border-top:1px solid rgba(255,255,255,0.08);margin:24px 0;">
-      <p style="color:#475569;font-size:0.8rem;">Soccer Analytics Suite · AI-Powered Match Intelligence</p>
+      <p style="color:#475569;font-size:0.8rem;">TaqTiq AI · AI-Powered Soccer Analytics</p>
     </div>
     """
-    msg.attach(MIMEText(html, "html"))
 
-    # Try STARTTLS on port 587 first, fall back to SSL on port 465
-    try:
-        with smtplib.SMTP(EMAIL_HOST, 587, timeout=15) as srv:
-            srv.ehlo()
-            srv.starttls()
-            srv.ehlo()
-            srv.login(EMAIL_USER, EMAIL_PASSWORD)
-            srv.sendmail(EMAIL_USER, to_email, msg.as_string())
-    except Exception as primary_err:
-        print(f"[Email] Port 587 failed ({primary_err}), trying SSL port 465...")
-        with smtplib.SMTP_SSL(EMAIL_HOST, 465, timeout=15) as srv:
-            srv.login(EMAIL_USER, EMAIL_PASSWORD)
-            srv.sendmail(EMAIL_USER, to_email, msg.as_string())
+    import urllib.request, json as _json
+    payload = _json.dumps({
+        "personalizations": [{"to": [{"email": to_email}]}],
+        "from": {"email": EMAIL_USER, "name": "TaqTiq AI"},
+        "subject": "Reset Your Password — TaqTiq AI",
+        "content": [{"type": "text/html", "value": html}],
+    }).encode()
+    req = urllib.request.Request(
+        "https://api.sendgrid.com/v3/mail/send",
+        data=payload,
+        headers={
+            "Authorization": f"Bearer {SENDGRID_API_KEY}",
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
+    with urllib.request.urlopen(req, timeout=15) as resp:
+        if resp.status >= 400:
+            raise Exception(f"SendGrid error {resp.status}")
 
 
 @app.route("/api/auth/forgot-password", methods=["POST"])

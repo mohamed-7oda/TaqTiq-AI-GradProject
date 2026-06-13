@@ -454,20 +454,35 @@ TaqTiq-AI-GradProject/
 
 ## Screenshots / Demo
 
-> Screenshots should be placed in a `screenshots/` folder at the repository root.
+### Login & Register
+![Login Page](screenshots/01_login.png)
 
-| Screenshot | Filename |
-|---|---|
-| Login / Register page | `screenshots/01_login.png` |
-| Video upload screen (mode selection) | `screenshots/02_upload.png` |
-| Event detection results — event timeline | `screenshots/03_events_timeline.png` |
-| Event detection results — team stats & possession bar | `screenshots/04_team_stats.png` |
-| Tactical heatmap view | `screenshots/05_heatmap.png` |
-| Highlights player | `screenshots/06_highlights.png` |
-| AI analyst chatbot | `screenshots/07_chatbot.png` |
-| Player tracking result — video + stats table | `screenshots/08_tracking.png` |
-| Analysis history page | `screenshots/09_history.png` |
-| User profile page | `screenshots/10_profile.png` |
+### Video Upload & Mode Selection
+![Upload Screen](screenshots/02_upload.png)
+
+### Event Detection — Timeline
+![Event Timeline](screenshots/03_events_timeline.png)
+
+### Event Detection — Team Stats & Possession
+![Team Stats](screenshots/04_team_stats.png)
+
+### Tactical Heatmap
+![Heatmap](screenshots/05_heatmap.png)
+
+### Highlights Reel Player
+![Highlights](screenshots/06_highlights.png)
+
+### AI Analyst Chatbot
+![Chatbot](screenshots/07_chatbot.png)
+
+### Player Tracking Result
+![Tracking](screenshots/08_tracking.png)
+
+### Analysis History
+![History](screenshots/09_history.png)
+
+### User Profile
+![Profile](screenshots/10_profile.png)
 
 ---
 

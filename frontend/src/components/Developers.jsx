@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 
 const TEAM = [
   {
@@ -36,15 +36,6 @@ function initials(name) {
 }
 
 function DevCard({ dev }) {
-  const [copied, setCopied] = useState(false);
-
-  const copyEmail = () => {
-    navigator.clipboard.writeText(dev.email).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
-  };
-
   return (
     <div className="dev-card">
       <div className="dev-avatar" style={{ background: `linear-gradient(${dev.gradient})` }}>
@@ -56,14 +47,19 @@ function DevCard({ dev }) {
       </div>
 
       <div className="dev-links">
-        <button onClick={copyEmail} className="dev-btn dev-btn-email" title={dev.email}>
+        <a
+          href={`https://mail.google.com/mail/?view=cm&to=${dev.email}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="dev-btn dev-btn-email"
+        >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <rect x="2" y="4" width="20" height="16" rx="2"/>
             <path d="M2 7l10 7 10-7"/>
           </svg>
-          {copied ? "Copied!" : "Email"}
-        </button>
+          Email
+        </a>
         <a href={dev.linkedin} target="_blank" rel="noopener noreferrer"
           className="dev-btn dev-btn-linkedin">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -168,8 +164,6 @@ export default function Developers() {
           background: rgba(255,255,255,0.06);
           border: 1px solid rgba(255,255,255,0.1);
           color: #cbd5e1;
-          cursor: pointer;
-          font-family: inherit;
         }
 
         .dev-btn-linkedin {

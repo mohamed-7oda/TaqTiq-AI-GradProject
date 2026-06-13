@@ -14,14 +14,16 @@ import ModeSelector   from "./components/ModeSelector";
 import HighlightsPlayer from "./components/HighlightsPlayer";
 import MatchDashboard   from "./components/MatchDashboard";
 import ChatBot          from "./components/ChatBot";
+import Developers       from "./components/Developers";
 import "./App.css";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 const TABS = [
-  { id: "analyze", label: "Analyze",  icon: "⚡" },
-  { id: "history", label: "History",  icon: "📋" },
-  { id: "profile", label: "Profile",  icon: "👤" },
+  { id: "analyze",    label: "Analyze",    icon: "⚡" },
+  { id: "history",    label: "History",    icon: "📋" },
+  { id: "profile",    label: "Profile",    icon: "👤" },
+  { id: "developers", label: "Developers", icon: "👥" },
 ];
 
 const PAGE_META = {
@@ -29,8 +31,9 @@ const PAGE_META = {
     events:   { title: "Event Detection",   sub: "Upload a match video and detect goals, fouls, cards, corners and 13 other events with precise timestamps." },
     tracking: { title: "Player Tracking",   sub: "Upload a clip and track every player — teams auto-assigned, with speed, distance and possession analytics." },
   },
-  history: { title: "Analysis History",  sub: "Browse and revisit all your previously analysed videos and results." },
-  profile: { title: "Your Profile",      sub: "Manage your account information and professional details." },
+  history:    { title: "Analysis History",  sub: "Browse and revisit all your previously analysed videos and results." },
+  profile:    { title: "Your Profile",      sub: "Manage your account information and professional details." },
+  developers: { title: "Meet the Team",     sub: "The people behind TaqTiq AI — reach out to us anytime." },
 };
 
 // ── Topbar ────────────────────────────────────────────────────────────────────
@@ -197,6 +200,9 @@ function AppContent() {
 
         {/* ── Profile ── */}
         {page === "profile" && <Profile />}
+
+        {/* ── Developers ── */}
+        {page === "developers" && <Developers />}
       </main>
 
       <footer className="footer">

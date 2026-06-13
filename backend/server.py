@@ -41,8 +41,7 @@ def _to_python(obj):
     return obj
 
 from huggingface_hub import InferenceClient
-import psycopg2
-import psycopg2.extras
+# DB drivers imported conditionally below after DATABASE_URL is read
 import bcrypt
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
@@ -78,6 +77,40 @@ HIGHLIGHT_MIN_CONF = 0.50  # minimum confidence to include an event
 MAX_HIGHLIGHT_CLIPS = 40   # cap to avoid extremely long videos
 
 DATABASE_URL = os.environ.get("DATABASE_URL", "")
+IS_POSTGRES  = bool(DATABASE_URL)
+SQL_NOW      = "NOW()" if IS_POSTGRES else "GETDATE()"
+
+if IS_POSTGRES:
+    import psycopg2, psycopg2.extras
+    def get_db():
+        return psycopg2.connect(DATABASE_URL)
+else:
+    import pyodbc
+    _DB_CONN_STR = (
+        "DRIVER={ODBC Driver 17 for SQL Server};"
+        "SERVER=LAPTOP-BQ4FQFIA\\SQLEXPRESS;"
+        "DATABASE=GradProject;"
+        "Trusted_Connection=yes;"
+    )
+    class _Cur:
+        """Wraps pyodbc cursor to accept %s-style params (same as psycopg2)."""
+        def __init__(self, c): self._c = c
+        def execute(self, sql, params=None):
+            sql = sql.replace("%s", "?")
+            self._c.execute(sql, params) if params else self._c.execute(sql)
+            return self
+        def fetchone(self):  return self._c.fetchone()
+        def fetchall(self):  return self._c.fetchall()
+        @property
+        def rowcount(self):  return self._c.rowcount
+    class _Conn:
+        """Wraps pyodbc connection to return _Cur cursors."""
+        def __init__(self, c): self._c = c
+        def cursor(self):  return _Cur(self._c.cursor())
+        def commit(self):  self._c.commit()
+        def close(self):   self._c.close()
+    def get_db():
+        return _Conn(pyodbc.connect(_DB_CONN_STR))
 
 # HuggingFace — chatbot
 HF_API_KEY   = os.environ.get("HF_API_KEY", "")
@@ -91,7 +124,7 @@ EMAIL_HOST     = "smtp.gmail.com"
 EMAIL_PORT     = 587
 EMAIL_USER     = os.environ.get("EMAIL_USER", "")
 EMAIL_PASSWORD = os.environ.get("EMAIL_PASSWORD", "")
-FRONTEND_URL   = "http://localhost:3000"
+FRONTEND_URL   = os.environ.get("FRONTEND_URL", "http://localhost:3000")
 
 ANALYST_SYSTEM_PROMPT = (
     "You are an expert football (soccer) analyst with deep knowledge of tactics, "
@@ -124,9 +157,7 @@ def check_if_revoked(_jwt_header, jwt_payload):
     return jwt_payload["jti"] in jwt_blacklist
 
 
-# ─────────────────────────── DB helper ──────────────────────────────────────
-def get_db():
-    return psycopg2.connect(DATABASE_URL)
+# ─────────────────────────── DB helper (defined above with driver) ───────────
 
 
 # ─────────────────────────── ML engines ─────────────────────────────────────
@@ -369,20 +400,12 @@ def _run_highlights(job_id, video_path, output_dir):
 
 # ─────────────────────────── Annotation helpers ─────────────────────────────
 OVERLAY_EVENTS = {
-    "Goal":               ("GOAL!",        "0x15803d"),
-    "Penalty":            ("PENALTY!",     "0x991b1b"),
-    "Yellow card":        ("YELLOW CARD",  "0x78350f"),
-    "Red card":           ("RED CARD",     "0x991b1b"),
-    "Yellow->red card":   ("RED CARD",     "0x991b1b"),
-    "Foul":               ("FOUL",         "0x9a3412"),
-    "Corner":             ("CORNER",       "0x1e3a8a"),
-    "Shots on target":    ("ON TARGET",    "0x4c1d95"),
-    "Shots off target":   ("OFF TARGET",   "0x1e293b"),
-    "Substitution":       ("SUBSTITUTION", "0x064e3b"),
-    "Offside":            ("OFFSIDE",      "0x78350f"),
-    "Indirect free-kick": ("FREE KICK",    "0x0c4a6e"),
-    "Direct free-kick":   ("FREE KICK",    "0x0c4a6e"),
-    "Clearance":          ("CLEARANCE",    "0x2e1065"),
+    "Goal":        ("GOAL",         "0x15803d"),
+    "Penalty":     ("PENALTY",      "0x9a3412"),
+    "Yellow card": ("YELLOW CARD",  "0x92400e"),
+    "Red card":    ("RED CARD",     "0x991b1b"),
+    "Foul":        ("FOUL",         "0xb45309"),
+    "Corner":      ("CORNER",       "0x1e40af"),
 }
 ANNOTATION_MIN_CONF = 0.50
 OVERLAY_SHOW_SECS   = 4.0
@@ -447,12 +470,12 @@ def _annotate_video(ffmpeg_exe, video_path, events, output_path):
         filters.append(
             f"drawtext=text='{label}'"
             f"{font_opt}"
-            f":fontsize=44"
+            f":fontsize=28"
             f":fontcolor=white"
             f":box=1"
-            f":boxcolor={box_hex}@0.92"
-            f":boxborderw=14"
-            f":x=28:y=28"
+            f":boxcolor={box_hex}@0.90"
+            f":boxborderw=10"
+            f":x=w-tw-22:y=22"
             f":enable='between(t,{ts:.3f},{te:.3f})'"
             f":alpha='{alpha_expr}'"
         )
@@ -581,19 +604,26 @@ def register():
     try:
         conn   = get_db()
         cursor = conn.cursor()
-        cursor.execute(
-            "INSERT INTO Users (FullName, Email, PasswordHash) "
-            "VALUES (%s, %s, %s) RETURNING UserID",
-            (full_name, email, password_hash),
-        )
+        if IS_POSTGRES:
+            cursor.execute(
+                "INSERT INTO Users (FullName, Email, PasswordHash) "
+                "VALUES (%s, %s, %s) RETURNING UserID",
+                (full_name, email, password_hash),
+            )
+        else:
+            cursor.execute(
+                "INSERT INTO Users (FullName, Email, PasswordHash) "
+                "OUTPUT INSERTED.UserID VALUES (?, ?, ?)",
+                (full_name, email, password_hash),
+            )
         user_id = int(cursor.fetchone()[0])
         conn.commit()
         conn.close()
-    except psycopg2.errors.UniqueViolation:
-        return jsonify({"error": "Email is already registered"}), 409
-    except Exception as e:
+    except Exception as _e:
+        if "unique" in str(_e).lower() or "duplicate" in str(_e).lower() or "23505" in str(_e) or "23000" in str(_e):
+            return jsonify({"error": "Email is already registered"}), 409
         traceback.print_exc()
-        return jsonify({"error": f"Database error: {e}"}), 500
+        return jsonify({"error": f"Database error: {_e}"}), 500
 
     token = create_access_token(identity=str(user_id))
     return jsonify({
@@ -664,10 +694,19 @@ def _send_reset_email(to_email: str, reset_url: str):
     """
     msg.attach(MIMEText(html, "html"))
 
-    with smtplib.SMTP(EMAIL_HOST, EMAIL_PORT) as srv:
-        srv.starttls()
-        srv.login(EMAIL_USER, EMAIL_PASSWORD)
-        srv.sendmail(EMAIL_USER, to_email, msg.as_string())
+    # Try STARTTLS on port 587 first, fall back to SSL on port 465
+    try:
+        with smtplib.SMTP(EMAIL_HOST, 587, timeout=15) as srv:
+            srv.ehlo()
+            srv.starttls()
+            srv.ehlo()
+            srv.login(EMAIL_USER, EMAIL_PASSWORD)
+            srv.sendmail(EMAIL_USER, to_email, msg.as_string())
+    except Exception as primary_err:
+        print(f"[Email] Port 587 failed ({primary_err}), trying SSL port 465...")
+        with smtplib.SMTP_SSL(EMAIL_HOST, 465, timeout=15) as srv:
+            srv.login(EMAIL_USER, EMAIL_PASSWORD)
+            srv.sendmail(EMAIL_USER, to_email, msg.as_string())
 
 
 @app.route("/api/auth/forgot-password", methods=["POST"])
@@ -708,7 +747,8 @@ def forgot_password():
         _send_reset_email(email, reset_url)
         print(f"[Auth] Password reset email sent to {email}")
     except Exception as e:
-        print(f"[Auth] Failed to send reset email: {e}")
+        traceback.print_exc()
+        print(f"[Auth] Failed to send reset email — USER={EMAIL_USER!r} HOST={EMAIL_HOST} ERR={e}")
         return jsonify({"error": "Failed to send email. Check server email configuration."}), 500
 
     return jsonify({"message": "If that email is registered you will receive a reset link shortly."}), 200
@@ -848,10 +888,10 @@ def update_profile():
         )
         if cursor.fetchone():
             cursor.execute(
-                "UPDATE UserProfiles "
-                "SET PhoneNumber=%s, DateOfBirth=%s, Country=%s, City=%s, "
-                "    Organization=%s, Role=%s, Bio=%s, UpdatedAt=NOW() "
-                "WHERE UserID=%s",
+                f"UPDATE UserProfiles "
+                f"SET PhoneNumber=%s, DateOfBirth=%s, Country=%s, City=%s, "
+                f"    Organization=%s, Role=%s, Bio=%s, UpdatedAt={SQL_NOW} "
+                f"WHERE UserID=%s",
                 (phone, dob, country, city, org, role, bio, user_id),
             )
         else:
@@ -994,11 +1034,18 @@ def history_tags(history_id):
             if not cursor.fetchone():
                 conn.close()
                 return jsonify({"error": "Not found"}), 404
-            cursor.execute(
-                "INSERT INTO AnalysisTags (UserID, HistoryID, Label) "
-                "VALUES (%s, %s, %s) RETURNING TagID, CreatedAt",
-                (user_id, history_id, label),
-            )
+            if IS_POSTGRES:
+                cursor.execute(
+                    "INSERT INTO AnalysisTags (UserID, HistoryID, Label) "
+                    "VALUES (%s, %s, %s) RETURNING TagID, CreatedAt",
+                    (user_id, history_id, label),
+                )
+            else:
+                cursor.execute(
+                    "INSERT INTO AnalysisTags (UserID, HistoryID, Label) "
+                    "OUTPUT INSERTED.TagID, INSERTED.CreatedAt VALUES (?, ?, ?)",
+                    (user_id, history_id, label),
+                )
             row = cursor.fetchone()
             conn.commit()
             conn.close()
@@ -1076,11 +1123,18 @@ def history_notes(history_id):
             if not cursor.fetchone():
                 conn.close()
                 return jsonify({"error": "Not found"}), 404
-            cursor.execute(
-                "INSERT INTO MatchNotes (HistoryID, UserID, NoteText) "
-                "VALUES (%s, %s, %s) RETURNING NoteID, CreatedAt",
-                (history_id, user_id, note_text),
-            )
+            if IS_POSTGRES:
+                cursor.execute(
+                    "INSERT INTO MatchNotes (HistoryID, UserID, NoteText) "
+                    "VALUES (%s, %s, %s) RETURNING NoteID, CreatedAt",
+                    (history_id, user_id, note_text),
+                )
+            else:
+                cursor.execute(
+                    "INSERT INTO MatchNotes (HistoryID, UserID, NoteText) "
+                    "OUTPUT INSERTED.NoteID, INSERTED.CreatedAt VALUES (?, ?, ?)",
+                    (history_id, user_id, note_text),
+                )
             row = cursor.fetchone()
             conn.commit()
             conn.close()
@@ -1147,12 +1201,20 @@ def history_note(history_id, note_id):
     try:
         conn   = get_db()
         cursor = conn.cursor()
-        cursor.execute(
-            "UPDATE MatchNotes SET NoteText=%s, UpdatedAt=NOW() "
-            "WHERE NoteID=%s AND HistoryID=%s AND UserID=%s "
-            "RETURNING UpdatedAt",
-            (note_text, note_id, history_id, user_id),
-        )
+        if IS_POSTGRES:
+            cursor.execute(
+                "UPDATE MatchNotes SET NoteText=%s, UpdatedAt=NOW() "
+                "WHERE NoteID=%s AND HistoryID=%s AND UserID=%s "
+                "RETURNING UpdatedAt",
+                (note_text, note_id, history_id, user_id),
+            )
+        else:
+            cursor.execute(
+                "UPDATE MatchNotes SET NoteText=?, UpdatedAt=GETDATE() "
+                "OUTPUT INSERTED.UpdatedAt "
+                "WHERE NoteID=? AND HistoryID=? AND UserID=?",
+                (note_text, note_id, history_id, user_id),
+            )
         row = cursor.fetchone()
         conn.commit()
         conn.close()

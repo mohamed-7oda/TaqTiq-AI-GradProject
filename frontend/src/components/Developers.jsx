@@ -16,7 +16,7 @@ const TEAM = [
     gradient: "135deg, #06b6d4, #3b82f6",
   },
   {
-    name:     "Mostafa Mohamed Mahmoud",
+    name:     "Mostafa Mahmoud Mohamed",
     role:     "Highlights & Deployment",
     email:    "mostafamadam33@gmail.com",
     linkedin: "https://www.linkedin.com/in/mostafa-adam-1187682b3/",

@@ -849,7 +849,10 @@ function HistoryCard({ item, token, selected, onToggleSelect, onDelete, onAskAI,
               }}
               title="Analyze this match with AI"
             >
-              ⚽ Ask AI
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2l1.9 5.8H20l-4.9 3.6 1.9 5.8L12 13.6l-5 3.6 1.9-5.8L4 7.8h6.1L12 2z"/>
+              </svg>
+              Ask AI
             </button>
           )}
 
@@ -912,7 +915,7 @@ function HistoryCard({ item, token, selected, onToggleSelect, onDelete, onAskAI,
       {open && (
         <div className="hc-details">
           {detailLoading && (
-            <div style={{ display:"flex", justifyContent:"center", padding:"1.5rem 0" }}>
+            <div className="hc-detail-loading">
               <span className="btn-spinner" />
             </div>
           )}
@@ -1012,7 +1015,10 @@ export default function History({ onAskAI }) {
     )}
     <div className="hist-wrap">
       <div className="hist-header">
-        <h2 className="hist-title">Analysis History</h2>
+        <div className="hist-header-left">
+          <h2 className="hist-title">Analysis History</h2>
+          <p className="hist-subtitle">Review, compare, and export your match analyses.</p>
+        </div>
         {!loading && !error && (
           <span className="hist-count">
             {items.length} {items.length === 1 ? "analysis" : "analyses"}
@@ -1030,7 +1036,7 @@ export default function History({ onAskAI }) {
               {!canCompare && ` — select ${2 - selectedIds.size} more to compare`}
             </span>
           </div>
-          <div style={{ display: "flex", gap: "0.5rem" }}>
+          <div className="hist-compare-actions">
             <button
               className="hist-compare-clear"
               onClick={() => setSelectedIds(new Set())}
@@ -1056,14 +1062,25 @@ export default function History({ onAskAI }) {
 
       {error && (
         <div className="hist-empty">
-          <div className="hist-empty-icon">⚠️</div>
-          <p>{error}</p>
+          <div className="hist-empty-icon hist-empty-icon-error">
+            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+          </div>
+          <p className="hist-empty-title">{error}</p>
         </div>
       )}
 
       {!loading && !error && items.length === 0 && (
         <div className="hist-empty">
-          <div className="hist-empty-icon">📋</div>
+          <div className="hist-empty-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="4" y="2" width="16" height="20" rx="2"/>
+              <path d="M8 10h8M8 14h5"/>
+            </svg>
+          </div>
           <p className="hist-empty-title">No analyses yet</p>
           <p className="hist-empty-sub">
             Upload a video to run your first analysis — results will appear here.
@@ -1089,137 +1106,163 @@ export default function History({ onAskAI }) {
       )}
 
       <style>{`
+        /* ── Wrapper ── */
         .hist-wrap { max-width: 760px; margin: 0 auto; padding-bottom: 3rem; }
 
+        /* ── Header ── */
         .hist-header {
-          display: flex; align-items: center; justify-content: space-between;
-          margin-bottom: 1.5rem;
+          display: flex; align-items: flex-start; justify-content: space-between;
+          margin-bottom: 1.5rem; gap: 1rem;
         }
+        .hist-header-left { display: flex; flex-direction: column; gap: 0.2rem; }
 
         .hist-title {
-          color: #f1f5f9; font-size: 1.3rem; font-weight: 600;
-          letter-spacing: -0.01em; margin: 0;
+          color: #f1f5f9; font-size: 1.45rem; font-weight: 700;
+          letter-spacing: -0.02em; margin: 0;
         }
+        .hist-subtitle { color: #4e6280; font-size: 0.83rem; margin: 0; }
 
         .hist-count {
           background: rgba(255,255,255,0.06);
           border: 1px solid rgba(255,255,255,0.1);
-          color: #94a3b8; padding: 0.3rem 0.8rem;
+          color: #94a3b8; padding: 0.3rem 0.85rem;
           border-radius: 999px; font-size: 0.82rem;
+          white-space: nowrap; flex-shrink: 0; align-self: flex-start;
+          margin-top: 0.2rem;
         }
 
-        .hist-center {
-          display: flex; justify-content: center; padding: 4rem 0;
-        }
+        /* ── Loading ── */
+        .hist-center { display: flex; justify-content: center; padding: 4rem 0; }
 
+        /* ── Empty / Error states ── */
         .hist-empty {
           text-align: center; padding: 4rem 2rem;
-          background: rgba(255,255,255,0.02);
-          border: 1px dashed rgba(255,255,255,0.1);
+          background: rgba(255,255,255,0.018);
+          border: 1px dashed rgba(255,255,255,0.08);
           border-radius: 20px;
         }
-        .hist-empty-icon  { font-size: 3rem; margin-bottom: 1rem; }
+        .hist-empty-icon {
+          display: flex; align-items: center; justify-content: center;
+          margin-bottom: 1.25rem; color: #2d3d52;
+        }
+        .hist-empty-icon-error { color: #7f2d2d; }
         .hist-empty-title { color: #cbd5e1; font-size: 1rem; font-weight: 600; margin: 0 0 0.4rem; }
-        .hist-empty-sub   { color: #64748b; font-size: 0.88rem; margin: 0; }
+        .hist-empty-sub   { color: #475569; font-size: 0.88rem; margin: 0 auto; line-height: 1.55; max-width: 340px; }
 
+        /* ── Card list ── */
         .hist-list { display: flex; flex-direction: column; gap: 0.75rem; }
 
         /* ── Card ── */
         .hc-card {
-          background: rgba(255,255,255,0.03);
+          background: rgba(255,255,255,0.028);
           border: 1px solid rgba(255,255,255,0.08);
           border-radius: 16px; overflow: hidden;
-          transition: border-color 0.2s;
+          transition: border-color 0.18s, box-shadow 0.18s;
         }
-        .hc-card:hover { border-color: rgba(255,255,255,0.14); }
-        .hc-card-open  { border-color: rgba(59,130,246,0.3); }
+        .hc-card:hover { border-color: rgba(255,255,255,0.13); }
+        .hc-card-open {
+          border-color: rgba(99,102,241,0.38);
+          box-shadow: 0 0 0 1px rgba(99,102,241,0.07);
+        }
+        .hc-card-selected {
+          border-color: rgba(59,130,246,0.45) !important;
+          background: rgba(59,130,246,0.04);
+        }
 
+        /* ── Card header row ── */
         .hc-header {
           display: flex; align-items: center; justify-content: space-between;
-          padding: 1.1rem 1.25rem; gap: 1rem; flex-wrap: wrap;
+          padding: 1rem 1.25rem; gap: 0.875rem;
         }
 
-        .hc-left { display: flex; flex-direction: column; gap: 0.45rem; min-width: 0; }
+        .hc-left { display: flex; flex-direction: column; gap: 0.4rem; min-width: 0; flex: 1; }
 
-        .hc-file {
-          display: flex; align-items: center; gap: 0.5rem;
-        }
-        .hc-file-icon {
-          width: 18px; height: 18px; color: #64748b; flex-shrink: 0;
-        }
+        .hc-file { display: flex; align-items: center; gap: 0.45rem; min-width: 0; }
+        .hc-file-icon { width: 16px; height: 16px; color: #94a3b8; flex-shrink: 0; }
         .hc-filename {
-          color: #f1f5f9; font-size: 0.92rem; font-weight: 500;
+          color: #f1f5f9; font-size: 0.95rem; font-weight: 600;
           overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+          letter-spacing: -0.01em;
         }
 
-        .hc-meta {
-          display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
-        }
+        .hc-meta { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
 
+        /* ── Mode badges ── */
         .hc-badge {
-          padding: 0.2rem 0.6rem; border-radius: 6px;
-          font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em;
-          text-transform: uppercase;
+          padding: 0.18rem 0.55rem; border-radius: 5px;
+          font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em;
+          text-transform: uppercase; flex-shrink: 0;
         }
         .badge-events {
-          background: rgba(59,130,246,0.15);
-          border: 1px solid rgba(59,130,246,0.3);
-          color: #93c5fd;
+          background: rgba(99,102,241,0.14);
+          border: 1px solid rgba(99,102,241,0.28);
+          color: #a5b4fc;
         }
         .badge-tracking {
-          background: rgba(236,72,153,0.15);
-          border: 1px solid rgba(236,72,153,0.3);
-          color: #f9a8d4;
+          background: rgba(16,185,129,0.12);
+          border: 1px solid rgba(16,185,129,0.28);
+          color: #6ee7b7;
         }
 
-        .hc-time { color: #64748b; font-size: 0.82rem; }
-        .hc-stat { color: #94a3b8; font-size: 0.82rem; }
+        .hc-time { color: #4e6280; font-size: 0.8rem; }
+        .hc-stat { color: #4e6280; font-size: 0.8rem; }
 
-        .hc-actions { display: flex; gap: 0.5rem; flex-shrink: 0; }
+        /* ── Action buttons ── */
+        .hc-actions { display: flex; gap: 0.4rem; flex-shrink: 0; align-items: center; }
+
+        .hc-btn-ai, .hc-btn-dl, .hc-btn-del, .hc-btn-toggle {
+          border-radius: 8px; cursor: pointer; font-family: inherit;
+          transition: background 0.18s, border-color 0.18s, color 0.18s, box-shadow 0.18s;
+        }
+        .hc-btn-ai:focus-visible,
+        .hc-btn-dl:focus-visible,
+        .hc-btn-toggle:focus-visible {
+          outline: 2px solid rgba(99,102,241,0.65); outline-offset: 2px;
+        }
+        .hc-btn-del:focus-visible {
+          outline: 2px solid rgba(239,68,68,0.6); outline-offset: 2px;
+        }
 
         .hc-btn-ai {
           display: flex; align-items: center; gap: 0.35rem;
-          background: rgba(59,130,246,0.12);
-          border: 1px solid rgba(59,130,246,0.3);
-          color: #93c5fd; padding: 0.45rem 0.8rem;
-          border-radius: 8px; font-size: 0.8rem; font-weight: 600;
-          cursor: pointer; transition: all 0.2s; white-space: nowrap;
+          background: rgba(99,102,241,0.12);
+          border: 1px solid rgba(99,102,241,0.28);
+          color: #a5b4fc; padding: 0.45rem 0.8rem;
+          font-size: 0.8rem; font-weight: 600; white-space: nowrap;
         }
         .hc-btn-ai:hover {
-          background: rgba(59,130,246,0.25);
-          border-color: rgba(59,130,246,0.55); color: #bfdbfe;
+          background: rgba(99,102,241,0.22);
+          border-color: rgba(99,102,241,0.5); color: #c7d2fe;
         }
 
         .hc-btn-dl {
           display: flex; align-items: center; gap: 0.4rem;
-          background: rgba(255,255,255,0.05);
+          background: rgba(255,255,255,0.045);
           border: 1px solid rgba(255,255,255,0.1);
-          color: #94a3b8; padding: 0.45rem 0.8rem;
-          border-radius: 8px; font-size: 0.8rem; cursor: pointer;
-          transition: all 0.2s;
+          color: #94a3b8; padding: 0.45rem 0.8rem; font-size: 0.8rem;
         }
         .hc-btn-dl:hover {
-          background: rgba(255,255,255,0.1); color: #cbd5e1;
+          background: rgba(255,255,255,0.09); color: #cbd5e1;
+          border-color: rgba(255,255,255,0.16);
         }
 
         .hc-btn-del {
           display: flex; align-items: center; justify-content: center;
-          width: 32px; height: 32px;
-          background: rgba(239,68,68,0.08);
-          border: 1px solid rgba(239,68,68,0.18);
-          color: #f87171; border-radius: 8px; cursor: pointer;
-          transition: all 0.2s; flex-shrink: 0;
+          width: 34px; height: 34px; flex-shrink: 0;
+          background: rgba(239,68,68,0.07);
+          border: 1px solid rgba(239,68,68,0.16);
+          color: #f87171;
         }
         .hc-btn-del:hover {
-          background: rgba(239,68,68,0.2);
-          border-color: rgba(239,68,68,0.4); color: #fca5a5;
+          background: rgba(239,68,68,0.18);
+          border-color: rgba(239,68,68,0.38); color: #fca5a5;
         }
 
         .hc-del-confirm {
           display: flex; align-items: center; gap: 0.35rem;
-          background: rgba(239,68,68,0.1);
-          border: 1px solid rgba(239,68,68,0.3);
-          border-radius: 8px; padding: 0.3rem 0.6rem;
+          background: rgba(239,68,68,0.08);
+          border: 1px solid rgba(239,68,68,0.24);
+          border-radius: 8px; padding: 0.28rem 0.6rem;
         }
         .hc-del-confirm-text {
           color: #fca5a5; font-size: 0.78rem; font-weight: 600; white-space: nowrap;
@@ -1228,58 +1271,119 @@ export default function History({ onAskAI }) {
           background: #dc2626; border: none; color: #fff;
           padding: 0.2rem 0.55rem; border-radius: 5px;
           font-size: 0.75rem; font-weight: 700; cursor: pointer;
-          transition: background 0.15s;
+          transition: background 0.15s; font-family: inherit;
         }
-        .hc-del-yes:hover { background: #b91c1c; }
+        .hc-del-yes:hover:not(:disabled) { background: #b91c1c; }
         .hc-del-yes:disabled { opacity: 0.5; cursor: default; }
+        .hc-del-yes:focus-visible { outline: 2px solid rgba(239,68,68,0.7); outline-offset: 2px; }
+
         .hc-del-no {
-          background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
+          background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
           color: #94a3b8; padding: 0.2rem 0.55rem; border-radius: 5px;
-          font-size: 0.75rem; cursor: pointer; transition: background 0.15s;
+          font-size: 0.75rem; cursor: pointer; transition: background 0.15s; font-family: inherit;
         }
-        .hc-del-no:hover { background: rgba(255,255,255,0.13); }
+        .hc-del-no:hover:not(:disabled) { background: rgba(255,255,255,0.12); }
         .hc-del-no:disabled { opacity: 0.5; cursor: default; }
+        .hc-del-no:focus-visible { outline: 2px solid rgba(99,102,241,0.55); outline-offset: 2px; }
 
         .hc-btn-toggle {
           display: flex; align-items: center; gap: 0.35rem;
-          background: rgba(59,130,246,0.1);
-          border: 1px solid rgba(59,130,246,0.25);
-          color: #93c5fd; padding: 0.45rem 0.9rem;
-          border-radius: 8px; font-size: 0.8rem; font-weight: 500;
-          cursor: pointer; transition: all 0.2s;
+          background: rgba(255,255,255,0.045);
+          border: 1px solid rgba(255,255,255,0.1);
+          color: #6b7fa0; padding: 0.45rem 0.9rem;
+          font-size: 0.8rem; font-weight: 500;
         }
         .hc-btn-toggle:hover,
         .hc-btn-toggle-open {
-          background: rgba(59,130,246,0.2);
-          border-color: rgba(59,130,246,0.45);
+          background: rgba(99,102,241,0.1);
+          border-color: rgba(99,102,241,0.3); color: #a5b4fc;
         }
 
-        /* ── Details panel ── */
+        /* ── Tags row (always below header) ── */
+        .hc-tags-row {
+          display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;
+          padding: 0.45rem 1.25rem 0.7rem;
+          border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .hc-tag {
+          display: inline-flex; align-items: center; gap: 0.3rem;
+          padding: 0.18rem 0.55rem; border-radius: 999px;
+          border: 1px solid; font-size: 0.73rem; font-weight: 500;
+          white-space: nowrap; max-width: 180px; overflow: hidden; text-overflow: ellipsis;
+        }
+        .hc-tag-x {
+          background: none; border: none; cursor: pointer;
+          color: inherit; opacity: 0.55; line-height: 1;
+          padding: 0; font-size: 0.9rem; flex-shrink: 0;
+          transition: opacity 0.15s;
+        }
+        .hc-tag-x:hover { opacity: 1; }
+
+        .hc-tag-input-wrap { display: flex; align-items: center; gap: 0.3rem; }
+        .hc-tag-input {
+          background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15);
+          color: #e2e8f0; border-radius: 6px; padding: 0.22rem 0.55rem;
+          font-size: 0.78rem; outline: none; width: 110px; font-family: inherit;
+          transition: border-color 0.15s;
+        }
+        .hc-tag-input:focus { border-color: rgba(99,102,241,0.55); }
+        .hc-tag-input::placeholder { color: #475569; }
+
+        .hc-tag-confirm {
+          background: rgba(99,102,241,0.16); border: 1px solid rgba(99,102,241,0.3);
+          color: #a5b4fc; padding: 0.22rem 0.6rem;
+          border-radius: 6px; font-size: 0.75rem; font-weight: 600;
+          cursor: pointer; transition: all 0.15s; font-family: inherit;
+        }
+        .hc-tag-confirm:hover:not(:disabled) { background: rgba(99,102,241,0.28); }
+        .hc-tag-confirm:disabled { opacity: 0.4; cursor: default; }
+        .hc-tag-confirm:focus-visible { outline: 2px solid rgba(99,102,241,0.65); outline-offset: 2px; }
+
+        .hc-tag-cancel-btn {
+          background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+          color: #64748b; padding: 0.22rem 0.5rem;
+          border-radius: 6px; font-size: 0.75rem; cursor: pointer;
+          transition: all 0.15s; font-family: inherit;
+        }
+        .hc-tag-cancel-btn:hover { color: #94a3b8; background: rgba(255,255,255,0.1); }
+        .hc-tag-cancel-btn:focus-visible { outline: 2px solid rgba(99,102,241,0.5); outline-offset: 2px; }
+
+        .hc-tag-plus {
+          background: none; border: 1px dashed rgba(255,255,255,0.18);
+          color: #4e6280; padding: 0.18rem 0.6rem;
+          border-radius: 999px; font-size: 0.73rem; cursor: pointer;
+          transition: all 0.15s; white-space: nowrap; font-family: inherit;
+        }
+        .hc-tag-plus:hover {
+          border-color: rgba(99,102,241,0.4); color: #a5b4fc;
+          background: rgba(99,102,241,0.06);
+        }
+        .hc-tag-plus:focus-visible { outline: 2px solid rgba(99,102,241,0.5); outline-offset: 2px; }
+
+        /* ── Expanded details panel ── */
         .hc-details {
           border-top: 1px solid rgba(255,255,255,0.06);
           padding: 1.25rem 1.5rem;
-          background: rgba(0,0,0,0.15);
+          background: rgba(0,0,0,0.1);
         }
-
+        .hc-detail-loading {
+          display: flex; justify-content: center; padding: 1.5rem 0;
+        }
         .hc-date-row {
-          color: #475569; font-size: 0.78rem; margin-top: 1rem;
+          color: #64748b; font-size: 0.78rem; margin-top: 1rem;
           padding-top: 0.75rem; border-top: 1px solid rgba(255,255,255,0.05);
         }
 
         /* ── Breakdown shared ── */
-        .hc-breakdown { }
-
         .hc-breakdown-title {
-          color: #94a3b8; font-size: 0.72rem; font-weight: 600;
-          letter-spacing: 0.07em; text-transform: uppercase;
+          color: #94a3b8; font-size: 0.7rem; font-weight: 700;
+          letter-spacing: 0.08em; text-transform: uppercase;
           margin-bottom: 0.75rem;
         }
-
-        .hc-bar-row {
-          display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;
-        }
+        .hc-bar-row { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; }
         .hc-bar-label {
-          color: #cbd5e1; font-size: 0.82rem; min-width: 130px;
+          color: #cbd5e1; font-size: 0.82rem; min-width: 110px;
           overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
         }
         .hc-bar-track {
@@ -1287,13 +1391,10 @@ export default function History({ onAskAI }) {
           border-radius: 999px; height: 6px; overflow: hidden;
         }
         .hc-bar-fill {
-          background: linear-gradient(90deg,#3b82f6,#8b5cf6);
-          height: 100%; border-radius: 999px;
-          transition: width 0.4s ease;
+          background: linear-gradient(90deg,#6366f1,#8b5cf6);
+          height: 100%; border-radius: 999px; transition: width 0.4s ease;
         }
-        .hc-bar-pink {
-          background: linear-gradient(90deg,#ec4899,#8b5cf6);
-        }
+        .hc-bar-pink { background: linear-gradient(90deg,#ec4899,#8b5cf6); }
         .hc-bar-count {
           color: #64748b; font-size: 0.82rem;
           font-variant-numeric: tabular-nums; min-width: 36px; text-align: right;
@@ -1302,24 +1403,26 @@ export default function History({ onAskAI }) {
         /* ── Tracking table ── */
         .hc-table { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
         .hc-table td { padding: 0.3rem 0; color: #94a3b8; }
-        .hc-td-rank  { color: #475569; width: 30px; }
-        .hc-td-id    { color: #cbd5e1; flex: 1; }
-        .hc-td-val   { color: #60a5fa; text-align: right; font-variant-numeric: tabular-nums; }
-
+        .hc-td-rank { color: #475569; width: 30px; }
+        .hc-td-id   { color: #cbd5e1; }
+        .hc-td-val  { color: #60a5fa; text-align: right; font-variant-numeric: tabular-nums; }
         .hc-no-stats { color: #475569; font-size: 0.85rem; }
 
-        /* ── Timestamp table ── */
+        /* ── Event timestamp table ── */
         .hc-ts-header {
           display: flex; align-items: center; justify-content: space-between;
           margin-top: 1.5rem; margin-bottom: 0.6rem;
         }
-
         .hc-ts-filter {
-          background: rgba(255,255,255,0.05);
-          border: 1px solid rgba(255,255,255,0.1);
+          background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
           color: #cbd5e1; padding: 0.3rem 0.6rem;
           border-radius: 7px; font-size: 0.78rem; cursor: pointer; outline: none;
-          appearance: none;
+          appearance: none; font-family: inherit; transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        .hc-ts-filter:focus,
+        .hc-ts-filter:focus-visible {
+          border-color: rgba(99,102,241,0.55);
+          box-shadow: 0 0 0 2px rgba(99,102,241,0.12);
         }
         .hc-ts-filter option { background: #1e293b; }
 
@@ -1330,181 +1433,98 @@ export default function History({ onAskAI }) {
         }
         .hc-ts-wrap::-webkit-scrollbar { width: 5px; height: 5px; }
         .hc-ts-wrap::-webkit-scrollbar-track { background: transparent; }
-        .hc-ts-wrap::-webkit-scrollbar-thumb {
-          background: rgba(255,255,255,0.1); border-radius: 99px;
-        }
+        .hc-ts-wrap::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 99px; }
 
-        .hc-ts-table {
-          width: 100%; border-collapse: collapse; font-size: 0.82rem;
-          min-width: 360px;
-        }
-
+        .hc-ts-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; min-width: 360px; }
         .hc-th {
           position: sticky; top: 0;
-          background: rgba(15,23,42,0.95);
-          color: #64748b; font-weight: 600; font-size: 0.72rem;
-          letter-spacing: 0.05em; text-transform: uppercase;
+          background: rgba(15,23,42,0.96);
+          color: #64748b; font-weight: 600; font-size: 0.7rem;
+          letter-spacing: 0.06em; text-transform: uppercase;
           padding: 0.55rem 0.8rem; text-align: left;
           border-bottom: 1px solid rgba(255,255,255,0.07);
         }
         .hc-th-event { width: 50%; }
         .hc-th-right { text-align: right; }
-
         .hc-ts-row { border-bottom: 1px solid rgba(255,255,255,0.04); }
         .hc-ts-row:last-child { border-bottom: none; }
-        .hc-ts-row:hover { background: rgba(255,255,255,0.03); }
-
+        .hc-ts-row:hover { background: rgba(255,255,255,0.025); }
         .hc-ts-half  { color: #475569; padding: 0.45rem 0.8rem; white-space: nowrap; }
-        .hc-ts-time  { color: #60a5fa; padding: 0.45rem 0.8rem; white-space: nowrap;
-                        font-variant-numeric: tabular-nums; font-weight: 500; }
+        .hc-ts-time  { color: #60a5fa; padding: 0.45rem 0.8rem; white-space: nowrap; font-variant-numeric: tabular-nums; font-weight: 500; }
         .hc-ts-event { color: #e2e8f0; padding: 0.45rem 0.8rem; }
-        .hc-ts-conf  { padding: 0.45rem 0.8rem; text-align: right;
-                        font-variant-numeric: tabular-nums; font-weight: 600; }
-        .hc-ts-empty {
-          text-align: center; color: #475569; padding: 1.5rem; font-size: 0.85rem;
-        }
+        .hc-ts-team  { padding: 0.35rem 0.8rem; }
+        .hc-ts-conf  { padding: 0.45rem 0.8rem; text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+        .hc-ts-empty { text-align: center; color: #475569; padding: 1.5rem; font-size: 0.85rem; }
 
         /* ── Spinner ── */
         .btn-spinner {
           width: 20px; height: 20px;
-          border: 2px solid rgba(255,255,255,0.2);
-          border-top-color: #60a5fa; border-radius: 50%;
+          border: 2px solid rgba(255,255,255,0.14);
+          border-top-color: #818cf8; border-radius: 50%;
           animation: hspin 0.7s linear infinite; display: inline-block;
         }
         .large-spinner { width: 36px; height: 36px; border-width: 3px; }
         @keyframes hspin { to { transform: rotate(360deg); } }
 
-        /* ── Selection & Compare ── */
-        .hc-card-selected {
-          border-color: rgba(59,130,246,0.45) !important;
-          background: rgba(59,130,246,0.04);
-        }
-
+        /* ── Selection checkbox ── */
         .hc-checkbox {
           width: 22px; height: 22px; border-radius: 6px; flex-shrink: 0;
-          border: 2px solid rgba(255,255,255,0.18);
+          border: 2px solid rgba(255,255,255,0.16);
           background: rgba(255,255,255,0.04);
           display: flex; align-items: center; justify-content: center;
           cursor: pointer; transition: all 0.18s;
         }
         .hc-checkbox:hover { border-color: rgba(59,130,246,0.6); background: rgba(59,130,246,0.1); }
+        .hc-checkbox:focus-visible { outline: 2px solid rgba(59,130,246,0.65); outline-offset: 2px; }
         .hc-checkbox-checked {
           background: #3b82f6 !important;
           border-color: #3b82f6 !important;
         }
 
+        /* ── Compare bar ── */
         .hist-compare-bar {
           display: flex; align-items: center; justify-content: space-between;
           gap: 0.75rem; flex-wrap: wrap;
-          background: rgba(59,130,246,0.08);
-          border: 1px solid rgba(59,130,246,0.25);
+          background: rgba(59,130,246,0.07);
+          border: 1px solid rgba(59,130,246,0.22);
           border-radius: 12px; padding: 0.75rem 1.1rem;
           margin-bottom: 1rem;
         }
         .hist-compare-info { display: flex; align-items: center; gap: 0.5rem; }
         .hist-compare-count {
           background: #3b82f6; color: #fff;
-          width: 24px; height: 24px; border-radius: 50%;
+          width: 22px; height: 22px; border-radius: 50%;
           display: flex; align-items: center; justify-content: center;
-          font-size: 0.78rem; font-weight: 700; flex-shrink: 0;
+          font-size: 0.76rem; font-weight: 700; flex-shrink: 0;
         }
         .hist-compare-label { color: #93c5fd; font-size: 0.83rem; }
+        .hist-compare-actions { display: flex; gap: 0.5rem; }
 
         .hist-compare-clear {
-          background: rgba(255,255,255,0.06);
-          border: 1px solid rgba(255,255,255,0.1);
+          background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
           color: #94a3b8; padding: 0.4rem 0.85rem;
           border-radius: 8px; font-size: 0.8rem; cursor: pointer;
-          transition: all 0.18s;
+          transition: all 0.18s; font-family: inherit;
         }
-        .hist-compare-clear:hover { background: rgba(255,255,255,0.12); color: #cbd5e1; }
+        .hist-compare-clear:hover { background: rgba(255,255,255,0.1); color: #cbd5e1; }
+        .hist-compare-clear:focus-visible { outline: 2px solid rgba(99,102,241,0.55); outline-offset: 2px; }
 
         .hist-compare-btn {
-          background: rgba(59,130,246,0.15);
-          border: 1px solid rgba(59,130,246,0.25);
-          color: #64748b; padding: 0.4rem 1.1rem;
+          background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2);
+          color: #475569; padding: 0.4rem 1.1rem;
           border-radius: 8px; font-size: 0.82rem; font-weight: 600;
-          cursor: not-allowed; transition: all 0.18s;
+          cursor: not-allowed; transition: all 0.18s; font-family: inherit;
         }
         .hist-compare-btn-active {
           color: #93c5fd; cursor: pointer;
-          background: rgba(59,130,246,0.2);
-          border-color: rgba(59,130,246,0.45);
+          background: rgba(59,130,246,0.18);
+          border-color: rgba(59,130,246,0.4);
         }
         .hist-compare-btn-active:hover {
-          background: rgba(59,130,246,0.3);
-          border-color: rgba(59,130,246,0.6);
-          color: #bfdbfe;
+          background: rgba(59,130,246,0.28);
+          border-color: rgba(59,130,246,0.6); color: #bfdbfe;
         }
-
-        /* ── Tags ── */
-        .hc-tags-row {
-          display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;
-          padding: 0 1.25rem 0.75rem;
-          border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .hc-tag {
-          display: inline-flex; align-items: center; gap: 0.3rem;
-          padding: 0.2rem 0.55rem; border-radius: 999px;
-          border: 1px solid; font-size: 0.74rem; font-weight: 500;
-          white-space: nowrap; max-width: 180px; overflow: hidden;
-          text-overflow: ellipsis;
-        }
-
-        .hc-tag-x {
-          background: none; border: none; cursor: pointer;
-          color: inherit; opacity: 0.6; line-height: 1;
-          padding: 0; font-size: 0.9rem; flex-shrink: 0;
-          transition: opacity 0.15s;
-        }
-        .hc-tag-x:hover { opacity: 1; }
-
-        .hc-tag-input-wrap {
-          display: flex; align-items: center; gap: 0.3rem;
-        }
-
-        .hc-tag-input {
-          background: rgba(255,255,255,0.06);
-          border: 1px solid rgba(255,255,255,0.15);
-          color: #e2e8f0; border-radius: 6px;
-          padding: 0.22rem 0.55rem; font-size: 0.78rem;
-          outline: none; width: 110px;
-          transition: border-color 0.15s;
-        }
-        .hc-tag-input:focus { border-color: rgba(59,130,246,0.5); }
-        .hc-tag-input::placeholder { color: #475569; }
-
-        .hc-tag-confirm {
-          background: rgba(59,130,246,0.2);
-          border: 1px solid rgba(59,130,246,0.35);
-          color: #93c5fd; padding: 0.22rem 0.6rem;
-          border-radius: 6px; font-size: 0.75rem; font-weight: 600;
-          cursor: pointer; transition: all 0.15s;
-        }
-        .hc-tag-confirm:hover:not(:disabled) { background: rgba(59,130,246,0.35); }
-        .hc-tag-confirm:disabled { opacity: 0.4; cursor: default; }
-
-        .hc-tag-cancel-btn {
-          background: rgba(255,255,255,0.05);
-          border: 1px solid rgba(255,255,255,0.1);
-          color: #64748b; padding: 0.22rem 0.5rem;
-          border-radius: 6px; font-size: 0.75rem; cursor: pointer;
-          transition: all 0.15s;
-        }
-        .hc-tag-cancel-btn:hover { color: #94a3b8; background: rgba(255,255,255,0.1); }
-
-        .hc-tag-plus {
-          background: none;
-          border: 1px dashed rgba(255,255,255,0.15);
-          color: #475569; padding: 0.18rem 0.6rem;
-          border-radius: 999px; font-size: 0.73rem; cursor: pointer;
-          transition: all 0.15s; white-space: nowrap;
-        }
-        .hc-tag-plus:hover {
-          border-color: rgba(59,130,246,0.4); color: #93c5fd;
-          background: rgba(59,130,246,0.06);
-        }
+        .hist-compare-btn-active:focus-visible { outline: 2px solid rgba(59,130,246,0.65); outline-offset: 2px; }
 
         /* ── Notes ── */
         .hc-notes-wrap {
@@ -1512,30 +1532,23 @@ export default function History({ onAskAI }) {
           border-top: 1px solid rgba(255,255,255,0.05);
           padding-top: 1rem;
         }
-
         .hc-notes-header {
           display: flex; align-items: center; justify-content: space-between;
           margin-bottom: 0.75rem;
         }
-
         .hc-note-add-btn {
-          background: rgba(139,92,246,0.12);
-          border: 1px solid rgba(139,92,246,0.25);
+          background: rgba(139,92,246,0.1); border: 1px solid rgba(139,92,246,0.22);
           color: #a78bfa; padding: 0.25rem 0.7rem;
           border-radius: 7px; font-size: 0.76rem; font-weight: 600;
-          cursor: pointer; transition: all 0.15s;
+          cursor: pointer; transition: all 0.15s; font-family: inherit;
         }
-        .hc-note-add-btn:hover {
-          background: rgba(139,92,246,0.22);
-          border-color: rgba(139,92,246,0.45);
-        }
+        .hc-note-add-btn:hover { background: rgba(139,92,246,0.2); border-color: rgba(139,92,246,0.4); }
+        .hc-note-add-btn:focus-visible { outline: 2px solid rgba(139,92,246,0.55); outline-offset: 2px; }
 
         .hc-note-form { margin-bottom: 0.75rem; }
-
         .hc-note-textarea {
           width: 100%; box-sizing: border-box;
-          background: rgba(255,255,255,0.04);
-          border: 1px solid rgba(255,255,255,0.12);
+          background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
           color: #e2e8f0; border-radius: 8px;
           padding: 0.65rem 0.85rem; font-size: 0.84rem;
           resize: vertical; outline: none; font-family: inherit;
@@ -1544,110 +1557,99 @@ export default function History({ onAskAI }) {
         .hc-note-textarea:focus { border-color: rgba(139,92,246,0.45); }
         .hc-note-textarea::placeholder { color: #475569; }
 
-        .hc-note-form-btns {
-          display: flex; gap: 0.45rem; margin-top: 0.45rem;
-        }
-
+        .hc-note-form-btns { display: flex; gap: 0.45rem; margin-top: 0.45rem; }
         .hc-note-save-btn {
-          background: rgba(139,92,246,0.2);
-          border: 1px solid rgba(139,92,246,0.35);
+          background: rgba(139,92,246,0.18); border: 1px solid rgba(139,92,246,0.32);
           color: #a78bfa; padding: 0.3rem 0.85rem;
           border-radius: 7px; font-size: 0.8rem; font-weight: 600;
-          cursor: pointer; transition: all 0.15s;
+          cursor: pointer; transition: all 0.15s; font-family: inherit;
         }
-        .hc-note-save-btn:hover:not(:disabled) {
-          background: rgba(139,92,246,0.32);
-          border-color: rgba(139,92,246,0.55);
-        }
+        .hc-note-save-btn:hover:not(:disabled) { background: rgba(139,92,246,0.3); border-color: rgba(139,92,246,0.52); }
         .hc-note-save-btn:disabled { opacity: 0.4; cursor: default; }
+        .hc-note-save-btn:focus-visible { outline: 2px solid rgba(139,92,246,0.55); outline-offset: 2px; }
 
         .hc-note-cancel-btn {
-          background: rgba(255,255,255,0.05);
-          border: 1px solid rgba(255,255,255,0.1);
+          background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
           color: #64748b; padding: 0.3rem 0.75rem;
           border-radius: 7px; font-size: 0.8rem; cursor: pointer;
-          transition: all 0.15s;
+          transition: all 0.15s; font-family: inherit;
         }
         .hc-note-cancel-btn:hover { color: #94a3b8; background: rgba(255,255,255,0.1); }
+        .hc-note-cancel-btn:focus-visible { outline: 2px solid rgba(99,102,241,0.5); outline-offset: 2px; }
 
         .hc-note-card {
-          background: rgba(255,255,255,0.03);
-          border: 1px solid rgba(255,255,255,0.07);
-          border-radius: 10px; padding: 0.75rem 0.9rem;
-          margin-bottom: 0.5rem;
+          background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.07);
+          border-radius: 10px; padding: 0.75rem 0.9rem; margin-bottom: 0.5rem;
         }
-
         .hc-note-text {
           color: #cbd5e1; font-size: 0.84rem; line-height: 1.5;
           margin: 0 0 0.45rem; white-space: pre-wrap; word-break: break-word;
         }
-
-        .hc-note-meta {
-          display: flex; align-items: center; justify-content: space-between;
-          gap: 0.5rem;
-        }
-
+        .hc-note-meta { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
         .hc-note-date { color: #475569; font-size: 0.74rem; }
-
         .hc-note-actions { display: flex; gap: 0.35rem; }
-
         .hc-note-edit-btn, .hc-note-del-btn {
           background: none; border: none; cursor: pointer;
           font-size: 0.74rem; padding: 0.15rem 0.4rem;
-          border-radius: 5px; transition: all 0.15s;
+          border-radius: 5px; transition: all 0.15s; font-family: inherit;
         }
         .hc-note-edit-btn { color: #60a5fa; }
         .hc-note-edit-btn:hover { background: rgba(96,165,250,0.12); }
+        .hc-note-edit-btn:focus-visible { outline: 2px solid rgba(96,165,250,0.55); outline-offset: 2px; }
         .hc-note-del-btn { color: #f87171; }
         .hc-note-del-btn:hover { background: rgba(248,113,113,0.12); }
-
-        .hc-notes-hint {
-          color: #475569; font-size: 0.82rem; margin: 0.25rem 0 0;
-        }
+        .hc-note-del-btn:focus-visible { outline: 2px solid rgba(248,113,113,0.55); outline-offset: 2px; }
+        .hc-notes-hint { color: #475569; font-size: 0.82rem; margin: 0.25rem 0 0; }
 
         /* ── Team stats mini ── */
         .hc-team-section {
-          margin-top: 1.25rem;
-          padding-top: 1rem;
+          margin-top: 1.25rem; padding-top: 1rem;
           border-top: 1px solid rgba(255,255,255,0.05);
         }
-
         .hc-team-header {
           display: grid; grid-template-columns: 1fr auto 1fr;
           align-items: center; margin-bottom: 0.5rem;
           font-size: 0.8rem; font-weight: 700;
         }
-
-        .hc-dom-row {
-          display: flex; align-items: center; gap: 0.6rem;
-          margin-bottom: 0.75rem;
-        }
+        .hc-dom-row { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.75rem; }
         .hc-dom-track {
           flex: 1; height: 6px; border-radius: 999px;
-          overflow: hidden; display: flex;
-          background: rgba(255,255,255,0.05);
+          overflow: hidden; display: flex; background: rgba(255,255,255,0.05);
         }
-
         .hc-duel-row {
           display: grid; grid-template-columns: 24px 1fr 24px;
-          align-items: center; gap: 0.4rem;
-          padding: 0.2rem 0;
+          align-items: center; gap: 0.4rem; padding: 0.2rem 0;
         }
-        .hc-duel-bars {
-          display: grid; grid-template-columns: 1fr auto 1fr;
-          align-items: center; gap: 0.3rem;
-        }
+        .hc-duel-bars { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 0.3rem; }
         .hc-duel-left  { height: 5px; background: rgba(255,255,255,0.05); border-radius: 999px; overflow: hidden; display: flex; justify-content: flex-end; }
         .hc-duel-right { height: 5px; background: rgba(255,255,255,0.05); border-radius: 999px; overflow: hidden; }
         .hc-duel-lbl   { color: #64748b; font-size: 0.7rem; white-space: nowrap; text-align: center; padding: 0 0.25rem; }
 
-        /* Team pill in table */
-        .hc-ts-team { padding: 0.35rem 0.8rem; }
+        /* ── Team pill in table ── */
         .hc-team-pill {
           display: inline-flex; align-items: center; gap: 4px;
           padding: 0.15rem 0.45rem; border-radius: 999px;
-          border: 1px solid; font-size: 0.68rem; font-weight: 700;
-          white-space: nowrap;
+          border: 1px solid; font-size: 0.68rem; font-weight: 700; white-space: nowrap;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 580px) {
+          .hc-header { padding: 0.875rem 1rem; flex-wrap: wrap; gap: 0.6rem; }
+          .hc-left { flex: 1; min-width: 0; }
+          .hc-actions { width: 100%; justify-content: flex-end; gap: 0.35rem; }
+          .hc-btn-ai, .hc-btn-dl, .hc-btn-toggle { font-size: 0.76rem; padding: 0.4rem 0.65rem; }
+          .hc-btn-del { width: 32px; height: 32px; }
+          .hc-details { padding: 1rem; }
+          .hc-bar-label { min-width: 90px; }
+          .hc-tags-row { padding: 0.45rem 1rem 0.65rem; }
+          .hist-header { flex-direction: column; gap: 0.4rem; }
+          .hist-count { align-self: flex-start; margin-top: 0; }
+        }
+
+        @media (max-width: 380px) {
+          .hc-actions { gap: 0.25rem; }
+          .hc-btn-ai, .hc-btn-dl, .hc-btn-toggle { padding: 0.38rem 0.5rem; font-size: 0.73rem; }
+          .hist-compare-bar { padding: 0.6rem 0.85rem; }
         }
       `}</style>
     </div>

@@ -19,11 +19,41 @@ import "./App.css";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
+const TAB_ICONS = {
+  analyze: (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+    </svg>
+  ),
+  history: (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+      <polyline points="14 2 14 8 20 8"/>
+      <line x1="16" y1="13" x2="8" y2="13"/>
+      <line x1="16" y1="17" x2="8" y2="17"/>
+    </svg>
+  ),
+  profile: (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+      <circle cx="12" cy="7" r="4"/>
+    </svg>
+  ),
+  developers: (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+      <circle cx="9" cy="7" r="4"/>
+      <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+      <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+    </svg>
+  ),
+};
+
 const TABS = [
-  { id: "analyze",    label: "Analyze",    icon: "⚡" },
-  { id: "history",    label: "History",    icon: "📋" },
-  { id: "profile",    label: "Profile",    icon: "👤" },
-  { id: "developers", label: "Developers", icon: "👥" },
+  { id: "analyze",    label: "Analyze",    icon: TAB_ICONS.analyze },
+  { id: "history",    label: "History",    icon: TAB_ICONS.history },
+  { id: "profile",    label: "Profile",    icon: TAB_ICONS.profile },
+  { id: "developers", label: "Developers", icon: TAB_ICONS.developers },
 ];
 
 const PAGE_META = {
@@ -36,10 +66,27 @@ const PAGE_META = {
   developers: { title: "Meet the Team",     sub: "The people behind TaqTiq AI — reach out to us anytime." },
 };
 
+// ── Theme hook ────────────────────────────────────────────────────────────────
+function useTheme() {
+  const [theme, setTheme] = useState(
+    () => localStorage.getItem("taqtiq-theme") || "dark"
+  );
+  React.useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    localStorage.setItem("taqtiq-theme", theme);
+  }, [theme]);
+  const toggleTheme = React.useCallback(
+    () => setTheme(t => (t === "dark" ? "light" : "dark")),
+    []
+  );
+  return { theme, toggleTheme };
+}
+
 // ── Topbar ────────────────────────────────────────────────────────────────────
-function Topbar({ user, page, onNav, onLogout }) {
+function Topbar({ user, page, onNav, onLogout, theme, onThemeToggle }) {
   const initials = user.fullName.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
   const firstName = user.fullName.split(" ")[0];
+  const isDark = theme === "dark";
   return (
     <header className="topbar">
       <div className="topbar-brand">
@@ -56,9 +103,10 @@ function Topbar({ user, page, onNav, onLogout }) {
             key={t.id}
             className={`topbar-tab ${page === t.id ? "active" : ""}`}
             onClick={() => onNav(t.id)}
+            aria-current={page === t.id ? "page" : undefined}
           >
             <span className="tab-icon">{t.icon}</span>
-            {t.label}
+            <span className="tab-label">{t.label}</span>
           </button>
         ))}
       </nav>
@@ -67,6 +115,30 @@ function Topbar({ user, page, onNav, onLogout }) {
         <span className="status-live"><span className="pulse-dot" />Live</span>
         <div className="user-avatar" title={user.fullName}>{initials}</div>
         <span className="user-name">{firstName}</span>
+        <button
+          className="theme-toggle"
+          onClick={onThemeToggle}
+          aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+          title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+        >
+          {isDark ? (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="5"/>
+              <line x1="12" y1="1"  x2="12" y2="3"/>
+              <line x1="12" y1="21" x2="12" y2="23"/>
+              <line x1="4.22" y1="4.22"   x2="5.64" y2="5.64"/>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+              <line x1="1"  y1="12" x2="3"  y2="12"/>
+              <line x1="21" y1="12" x2="23" y2="12"/>
+              <line x1="4.22" y1="19.78"  x2="5.64" y2="18.36"/>
+              <line x1="18.36" y1="5.64"  x2="19.78" y2="4.22"/>
+            </svg>
+          ) : (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>
+          )}
+        </button>
         <button className="logout-btn" onClick={onLogout}>Sign Out</button>
       </div>
     </header>
@@ -87,6 +159,7 @@ function PageHero({ page, mode }) {
 // ── Main app (authenticated) ──────────────────────────────────────────────────
 function AppContent() {
   const { user, token, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
 
   const resetToken = new URLSearchParams(window.location.search).get("reset_token");
   const [authView, setAuthView] = useState(resetToken ? "reset" : "login");
@@ -132,7 +205,7 @@ function AppContent() {
 
   return (
     <div className="app">
-      <Topbar user={user} page={page} onNav={handleNav} onLogout={logout} />
+      <Topbar user={user} page={page} onNav={handleNav} onLogout={logout} theme={theme} onThemeToggle={toggleTheme} />
 
       <PageHero page={page} mode={mode} />
 

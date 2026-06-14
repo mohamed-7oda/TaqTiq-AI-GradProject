@@ -9,6 +9,7 @@ export default function Register({ onSwitch }) {
   const [confirm,  setConfirm]  = useState("");
   const [error,    setError]    = useState("");
   const [loading,  setLoading]  = useState(false);
+  const [consent,  setConsent]  = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -18,6 +19,7 @@ export default function Register({ onSwitch }) {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) { setError("Please enter a valid email address."); return; }
     if (password.length < 6) { setError("Password must be at least 6 characters."); return; }
     if (password !== confirm) { setError("Passwords do not match."); return; }
+    if (!consent) { setError("You must accept the Terms and Conditions to create an account."); return; }
     setLoading(true);
     try {
       await register(fullName.trim(), email.trim().toLowerCase(), password);
@@ -30,12 +32,12 @@ export default function Register({ onSwitch }) {
 
   return (
     <div className="auth-page">
-      <div className="auth-card">
+      <div className="auth-card auth-card-register">
         <div className="auth-logo">
           <img src="/logo.png" alt="TaqTiq AI" className="auth-logo-img" />
         </div>
 
-        <h2 className="auth-title">Create your account</h2>
+        <h2 className="auth-title">Create Your Account</h2>
         <p className="auth-subtitle">Join TaqTiq AI and start analysing matches.</p>
 
         <form onSubmit={handleSubmit} className="auth-form">
@@ -51,6 +53,9 @@ export default function Register({ onSwitch }) {
               value={email} onChange={e => setEmail(e.target.value)}
               autoComplete="email" disabled={loading} />
           </div>
+
+          <hr className="form-section-gap" />
+
           <div className="form-group">
             <label className="form-label">Password</label>
             <input type="password" className="form-input" placeholder="At least 6 characters"
@@ -59,22 +64,45 @@ export default function Register({ onSwitch }) {
           </div>
           <div className="form-group">
             <label className="form-label">Confirm Password</label>
-            <input type="password" className="form-input" placeholder="••••••••"
+            <input
+              type="password"
+              className={`form-input${confirm && confirm !== password ? " input-error" : ""}`}
+              placeholder="Repeat your password"
               value={confirm} onChange={e => setConfirm(e.target.value)}
-              autoComplete="new-password" disabled={loading}
-              style={confirm && confirm !== password ? { borderColor: "rgba(244,63,94,0.5)" } : {}} />
+              autoComplete="new-password" disabled={loading} />
             {confirm && confirm !== password && (
-              <span style={{ fontSize: "0.72rem", color: "#fda4af" }}>Passwords do not match</span>
+              <p className="auth-input-hint">Passwords do not match</p>
             )}
+          </div>
+
+          <div className="consent-block">
+            <label className="consent-label">
+              <input
+                type="checkbox"
+                className="consent-checkbox"
+                checked={consent}
+                onChange={e => setConsent(e.target.checked)}
+                disabled={loading}
+              />
+              <span>
+                I agree to the <strong>Terms and Conditions</strong> and <strong>Privacy Policy</strong>.
+              </span>
+            </label>
+            <ul className="consent-points">
+              <li>Videos you upload are processed by AI models and analysis results are stored in your account.</li>
+              <li>We do not sell or share your data with third parties.</li>
+              <li>You are responsible for ensuring you have the legal right to upload and analyse submitted video content.</li>
+            </ul>
           </div>
 
           {error && <div className="auth-error">{error}</div>}
 
-          <button type="submit" className="auth-btn" disabled={loading}>
+          <button type="submit" className="auth-btn" disabled={loading || !consent}>
             {loading ? <span className="btn-spinner" /> : "Create Account"}
           </button>
         </form>
 
+        <hr className="auth-divider" />
         <p className="auth-switch">
           Already have an account?{" "}
           <button className="auth-link" onClick={onSwitch}>Sign in</button>

@@ -29,8 +29,8 @@ export default function Login({ onSwitch, onForgot }) {
           <img src="/logo.png" alt="TaqTiq AI" className="auth-logo-img" />
         </div>
 
-        <h2 className="auth-title">Welcome back</h2>
-        <p className="auth-subtitle">Sign in to your account to continue.</p>
+        <h2 className="auth-title">Welcome Back</h2>
+        <p className="auth-subtitle">Sign in to your TaqTiq AI account to continue.</p>
 
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
@@ -43,9 +43,9 @@ export default function Login({ onSwitch, onForgot }) {
           </div>
 
           <div className="form-group">
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div className="form-label-row">
               <label className="form-label">Password</label>
-              <button type="button" className="auth-link" style={{ fontSize: "0.78rem" }} onClick={onForgot}>
+              <button type="button" className="auth-forgot-link" onClick={onForgot}>
                 Forgot password?
               </button>
             </div>
@@ -63,6 +63,7 @@ export default function Login({ onSwitch, onForgot }) {
           </button>
         </form>
 
+        <hr className="auth-divider" />
         <p className="auth-switch">
           Don't have an account?{" "}
           <button className="auth-link" onClick={onSwitch}>Create one</button>

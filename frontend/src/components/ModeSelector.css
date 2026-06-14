@@ -5,11 +5,12 @@
 
 .mode-title {
   text-align: center;
-  font-size: 1.2rem;
-  margin-bottom: 1.1rem;
-  color: #e2e8f0;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-size: 0.72rem;
+  margin-bottom: 1rem;
+  color: #64748b;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
 .mode-cards {
@@ -19,82 +20,162 @@
 }
 
 .mode-card {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  position: relative;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
-  padding: 1.6rem 1.5rem;
+  padding: 1.75rem 1.6rem;
   cursor: pointer;
-  color: #94a3b8;
-  transition: all 0.22s ease;
+  color: #64748b;
+  transition: border-color 0.22s ease, background 0.22s ease, transform 0.22s ease, box-shadow 0.22s ease;
   text-align: left;
   font-family: inherit;
+  overflow: hidden;
+  outline: none;
 }
 
+/* Top accent line — visible on active */
+.mode-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #6366f1, #818cf8);
+  border-radius: 16px 16px 0 0;
+  opacity: 0;
+  transition: opacity 0.22s ease;
+}
+
+.mode-card.tracking::after {
+  background: linear-gradient(90deg, #10b981, #06b6d4);
+}
+
+.mode-card.active::after { opacity: 1; }
+
 .mode-card:hover {
-  border-color: rgba(99, 102, 241, 0.5);
-  background: rgba(99, 102, 241, 0.05);
+  border-color: rgba(99, 102, 241, 0.4);
+  background: rgba(99, 102, 241, 0.04);
   transform: translateY(-2px);
-  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.12);
+  box-shadow: 0 6px 24px rgba(99, 102, 241, 0.1);
+}
+
+.mode-card:focus-visible {
+  border-color: rgba(99, 102, 241, 0.7);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+.mode-card.tracking:focus-visible {
+  border-color: rgba(16, 185, 129, 0.7);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.18);
 }
 
 .mode-card.active {
-  border-color: #6366f1;
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.18), rgba(139, 92, 246, 0.12));
-  box-shadow: 0 0 26px rgba(99, 102, 241, 0.22);
+  border-color: rgba(99, 102, 241, 0.45);
+  background: linear-gradient(145deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.06));
+  box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.2), 0 8px 32px rgba(99, 102, 241, 0.15);
+  transform: translateY(-1px);
 }
 
 .mode-card.tracking:hover {
-  border-color: rgba(236, 72, 153, 0.5);
-  background: rgba(236, 72, 153, 0.05);
-  box-shadow: 0 4px 20px rgba(236, 72, 153, 0.1);
+  border-color: rgba(16, 185, 129, 0.4);
+  background: rgba(16, 185, 129, 0.04);
+  box-shadow: 0 6px 24px rgba(16, 185, 129, 0.08);
 }
 
 .mode-card.tracking.active {
-  border-color: #ec4899;
-  background: linear-gradient(135deg, rgba(236, 72, 153, 0.18), rgba(139, 92, 246, 0.12));
-  box-shadow: 0 0 26px rgba(236, 72, 153, 0.2);
+  border-color: rgba(16, 185, 129, 0.45);
+  background: linear-gradient(145deg, rgba(16, 185, 129, 0.1), rgba(6, 182, 212, 0.06));
+  box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.2), 0 8px 32px rgba(16, 185, 129, 0.12);
 }
 
 .mode-icon {
-  font-size: 2.2rem;
-  margin-bottom: 0.75rem;
-  display: block;
+  width: 48px;
+  height: 48px;
+  background: rgba(99, 102, 241, 0.1);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.22s ease;
+  color: #a5b4fc;
 }
 
+.mode-card.tracking .mode-icon {
+  background: rgba(16, 185, 129, 0.1);
+  color: #6ee7b7;
+}
+
+.mode-card.active .mode-icon   { background: rgba(99, 102, 241, 0.18); }
+.mode-card.tracking.active .mode-icon { background: rgba(16, 185, 129, 0.18); }
+
 .mode-card h3 {
-  color: #f1f5f9;
-  font-size: 1.1rem;
-  margin: 0 0 0.45rem;
+  color: #e2e8f0;
+  font-size: 1.05rem;
+  margin: 0.85rem 0 0.4rem;
   font-weight: 600;
   font-family: 'Space Grotesk', sans-serif;
+  letter-spacing: -0.01em;
 }
 
 .mode-card p {
-  font-size: 0.87rem;
-  line-height: 1.55;
+  font-size: 0.85rem;
+  line-height: 1.58;
   margin: 0 0 1rem;
   color: #64748b;
 }
 
 .mode-badge {
-  display: inline-block;
-  font-size: 0.7rem;
-  padding: 0.25rem 0.65rem;
-  background: rgba(99, 102, 241, 0.15);
-  border: 1px solid rgba(99, 102, 241, 0.3);
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.68rem;
+  padding: 0.22rem 0.6rem;
+  background: rgba(99, 102, 241, 0.12);
+  border: 1px solid rgba(99, 102, 241, 0.28);
   border-radius: 999px;
   color: #a5b4fc;
   font-weight: 600;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
 .mode-card.tracking .mode-badge {
-  background: rgba(236, 72, 153, 0.15);
-  border-color: rgba(236, 72, 153, 0.3);
-  color: #f9a8d4;
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.28);
+  color: #6ee7b7;
 }
 
 @media (max-width: 640px) {
   .mode-cards { grid-template-columns: 1fr; }
 }
+
+/* ── Light Mode ── */
+[data-theme="light"] .mode-title { color: #94a3b8; }
+
+[data-theme="light"] .mode-card {
+  background: rgba(255, 255, 255, 0.75);
+  border-color: rgba(0, 0, 0, 0.09);
+  color: #4b5563;
+}
+[data-theme="light"] .mode-card:hover {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(99, 102, 241, 0.38);
+  box-shadow: 0 6px 24px rgba(99, 102, 241, 0.08);
+}
+[data-theme="light"] .mode-card.tracking:hover {
+  border-color: rgba(16, 185, 129, 0.38);
+  box-shadow: 0 6px 24px rgba(16, 185, 129, 0.07);
+  background: rgba(255, 255, 255, 0.95);
+}
+[data-theme="light"] .mode-card.active {
+  background: rgba(255, 255, 255, 0.97);
+  border-color: rgba(99, 102, 241, 0.42);
+  box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.18), 0 8px 32px rgba(99, 102, 241, 0.1);
+}
+[data-theme="light"] .mode-card.tracking.active {
+  border-color: rgba(16, 185, 129, 0.42);
+  box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.18), 0 8px 32px rgba(16, 185, 129, 0.09);
+}
+[data-theme="light"] .mode-card h3 { color: #0f172a; }
+[data-theme="light"] .mode-card p  { color: #475569; }
+[data-theme="light"] .mode-icon    { background: rgba(99, 102, 241, 0.08); }
+[data-theme="light"] .mode-card.tracking .mode-icon { background: rgba(16, 185, 129, 0.08); }

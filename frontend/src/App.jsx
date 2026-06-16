@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import Login          from "./components/auth/Login";
 import Register       from "./components/auth/Register";
@@ -49,22 +50,7 @@ const TAB_ICONS = {
   ),
 };
 
-const TABS = [
-  { id: "analyze",    label: "Analyze",    icon: TAB_ICONS.analyze },
-  { id: "history",    label: "History",    icon: TAB_ICONS.history },
-  { id: "profile",    label: "Profile",    icon: TAB_ICONS.profile },
-  { id: "developers", label: "Developers", icon: TAB_ICONS.developers },
-];
-
-const PAGE_META = {
-  analyze: {
-    events:   { title: "Event Detection",   sub: "Upload a match video and detect goals, fouls, cards, corners and 13 other events with precise timestamps." },
-    tracking: { title: "Player Tracking",   sub: "Upload a clip and track every player — teams auto-assigned, with speed, distance and possession analytics." },
-  },
-  history:    { title: "Analysis History",  sub: "Browse and revisit all your previously analysed videos and results." },
-  profile:    { title: "Your Profile",      sub: "Manage your account information and professional details." },
-  developers: { title: "Meet the Team",     sub: "The people behind TaqTiq AI — reach out to us anytime." },
-};
+const TAB_IDS = ["analyze", "history", "profile", "developers"];
 
 // ── Theme hook ────────────────────────────────────────────────────────────────
 function useTheme() {
@@ -84,42 +70,51 @@ function useTheme() {
 
 // ── Topbar ────────────────────────────────────────────────────────────────────
 function Topbar({ user, page, onNav, onLogout, theme, onThemeToggle }) {
+  const { t, i18n } = useTranslation();
   const initials = user.fullName.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
   const firstName = user.fullName.split(" ")[0];
   const isDark = theme === "dark";
+
+  const TABS = [
+    { id: "analyze",    label: t("nav.analyze"),    icon: TAB_ICONS.analyze },
+    { id: "history",    label: t("nav.history"),    icon: TAB_ICONS.history },
+    { id: "profile",    label: t("nav.profile"),    icon: TAB_ICONS.profile },
+    { id: "developers", label: t("nav.developers"), icon: TAB_ICONS.developers },
+  ];
+
   return (
     <header className="topbar">
       <div className="topbar-brand">
         <img src="/favicon.png" alt="TaqTiq AI" className="topbar-logo" />
         <div className="topbar-brand-text">
           <span className="topbar-name">TaqTiq <span>Ai</span></span>
-          <span className="topbar-tagline">AI-Driven Soccer Analytics</span>
+          <span className="topbar-tagline">{t("footer.tagline")}</span>
         </div>
       </div>
 
       <nav className="topbar-nav">
-        {TABS.map(t => (
+        {TABS.map(tab => (
           <button
-            key={t.id}
-            className={`topbar-tab ${page === t.id ? "active" : ""}`}
-            onClick={() => onNav(t.id)}
-            aria-current={page === t.id ? "page" : undefined}
+            key={tab.id}
+            className={`topbar-tab ${page === tab.id ? "active" : ""}`}
+            onClick={() => onNav(tab.id)}
+            aria-current={page === tab.id ? "page" : undefined}
           >
-            <span className="tab-icon">{t.icon}</span>
-            <span className="tab-label">{t.label}</span>
+            <span className="tab-icon">{tab.icon}</span>
+            <span className="tab-label">{tab.label}</span>
           </button>
         ))}
       </nav>
 
       <div className="topbar-user">
-        <span className="status-live"><span className="pulse-dot" />Live</span>
+        <span className="status-live"><span className="pulse-dot" />{t("nav.live")}</span>
         <div className="user-avatar" title={user.fullName}>{initials}</div>
         <span className="user-name">{firstName}</span>
         <button
           className="theme-toggle"
           onClick={onThemeToggle}
-          aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-          title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+          aria-label={isDark ? t("nav.switchLight") : t("nav.switchDark")}
+          title={isDark ? t("nav.switchLight") : t("nav.switchDark")}
         >
           {isDark ? (
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -139,7 +134,14 @@ function Topbar({ user, page, onNav, onLogout, theme, onThemeToggle }) {
             </svg>
           )}
         </button>
-        <button className="logout-btn" onClick={onLogout}>Sign Out</button>
+        <button
+          className="lang-toggle"
+          onClick={() => i18n.changeLanguage(i18n.language === "ar" ? "en" : "ar")}
+          title={t("nav.language")}
+        >
+          {t("nav.language")}
+        </button>
+        <button className="logout-btn" onClick={onLogout}>{t("nav.signOut")}</button>
       </div>
     </header>
   );
@@ -147,11 +149,13 @@ function Topbar({ user, page, onNav, onLogout, theme, onThemeToggle }) {
 
 // ── Page hero ─────────────────────────────────────────────────────────────────
 function PageHero({ page, mode }) {
-  const meta = page === "analyze" ? PAGE_META.analyze[mode] : PAGE_META[page];
+  const { t } = useTranslation();
+  const titleKey = page === "analyze" ? `page.analyze.${mode}.title` : `page.${page}.title`;
+  const subKey   = page === "analyze" ? `page.analyze.${mode}.sub`   : `page.${page}.sub`;
   return (
     <div className="page-hero">
-      <h1 className="page-title">{meta?.title}</h1>
-      <p className="page-subtitle">{meta?.sub}</p>
+      <h1 className="page-title">{t(titleKey)}</h1>
+      <p className="page-subtitle">{t(subKey)}</p>
     </div>
   );
 }
@@ -160,6 +164,7 @@ function PageHero({ page, mode }) {
 function AppContent() {
   const { user, token, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { t } = useTranslation();
 
   const resetToken = new URLSearchParams(window.location.search).get("reset_token");
   const [authView, setAuthView] = useState(resetToken ? "reset" : "login");
@@ -251,15 +256,15 @@ function AppContent() {
 
             {status === "failed" && (
               <div className="error-box">
-                <h3>Processing Failed</h3>
+                <h3>{t("error.processingFailed")}</h3>
                 <p>{error || statusMessage}</p>
-                <button className="btn-secondary" onClick={handleReset}>Try Another Video</button>
+                <button className="btn-secondary" onClick={handleReset}>{t("error.tryAnother")}</button>
               </div>
             )}
 
             {error && !jobId && (
               <div className="error-box">
-                <h3>Upload Error</h3>
+                <h3>{t("error.uploadError")}</h3>
                 <p>{error}</p>
               </div>
             )}
@@ -281,9 +286,9 @@ function AppContent() {
       <footer className="footer">
         <div className="footer-brand">
           <img src="/logo.png" alt="TaqTiq AI" className="footer-logo" />
-          <span>TaqTiq AI · AI-Driven Soccer Analytics</span>
+          <span>TaqTiq AI · {t("footer.tagline")}</span>
         </div>
-        <span>AI-powered event detection · player tracking · team analytics</span>
+        <span>{t("footer.features")}</span>
       </footer>
 
       <ChatBot apiUrl={API_URL} token={token} results={results} historyContext={chatContext} />

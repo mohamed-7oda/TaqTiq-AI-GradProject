@@ -1,5 +1,6 @@
 // frontend/src/components/VideoUpload.jsx
 import React, { useState, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import axios from "axios";
 
 // ── SVG icon constants ────────────────────────────────────────────────────────
@@ -45,6 +46,7 @@ const Icons = {
 };
 
 function VideoUpload({ apiUrl, mode, token, onUploadStart, onUploadSuccess, onUploadError }) {
+  const { t } = useTranslation();
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -94,23 +96,22 @@ function VideoUpload({ apiUrl, mode, token, onUploadStart, onUploadSuccess, onUp
   };
 
   // ---- Mode-specific UI ----
-  const ctaLabel = isTracking ? "Run Tracking" : "Detect Events";
+  const ctaLabel = isTracking ? t("upload.runTracking") : t("upload.detectEvents");
 
-  // Complementary to PageHero subtitle — adds spec guidance, not a duplicate
   const modeGuidance = isTracking
-    ? "Best results with a 30–60 second clip. Supports MP4, MKV, AVI, MOV, WebM — up to 2 GB."
-    : "Full match videos work best. Supports MP4, MKV, AVI, MOV, WebM — up to 2 GB.";
+    ? t("upload.guidance.tracking")
+    : t("upload.guidance.events");
 
   const features = isTracking
     ? [
-        { icon: Icons.target,   title: "Full Player Tracking",   text: "Every player identified and tracked across the entire match with unique IDs." },
-        { icon: Icons.activity, title: "Speed & Distance Stats", text: "Real-time speed and total distance covered per player throughout the game." },
-        { icon: Icons.barChart, title: "Possession Analysis",    text: "Automatic ball possession percentages calculated for each team." },
+        { icon: Icons.target,   title: t("upload.feature.tracking.1.title"), text: t("upload.feature.tracking.1.text") },
+        { icon: Icons.activity, title: t("upload.feature.tracking.2.title"), text: t("upload.feature.tracking.2.text") },
+        { icon: Icons.barChart, title: t("upload.feature.tracking.3.title"), text: t("upload.feature.tracking.3.text") },
       ]
     : [
-        { icon: Icons.lightning, title: "17 Event Types",     text: "Goals, fouls, cards, corners, offsides, shots, free kicks and more — all detected automatically." },
-        { icon: Icons.clock,     title: "Precise Timestamps", text: "Every event pinpointed to the exact second with confidence scores." },
-        { icon: Icons.users,     title: "Team Attribution",   text: "Each event automatically assigned to the correct team based on jersey colour analysis." },
+        { icon: Icons.lightning, title: t("upload.feature.events.1.title"), text: t("upload.feature.events.1.text") },
+        { icon: Icons.clock,     title: t("upload.feature.events.2.title"), text: t("upload.feature.events.2.text") },
+        { icon: Icons.users,     title: t("upload.feature.events.3.title"), text: t("upload.feature.events.3.text") },
       ];
 
   return (
@@ -128,7 +129,7 @@ function VideoUpload({ apiUrl, mode, token, onUploadStart, onUploadSuccess, onUp
               <polyline points="12 6 12 12 16 14"/>
             </svg>
           </span>
-          <span>Processing takes several minutes — keep this page open until complete.</span>
+          <span>{t("upload.keepOpen")}</span>
         </div>
         {isTracking ? (
           <div className="vu-note">
@@ -137,7 +138,7 @@ function VideoUpload({ apiUrl, mode, token, onUploadStart, onUploadSuccess, onUp
                 <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
               </svg>
             </span>
-            <span>For best tracking results, use a clip <strong>30 seconds to 1 minute</strong> long.</span>
+            <span dangerouslySetInnerHTML={{ __html: t("upload.clipHint") }} />
           </div>
         ) : (
           <div className="vu-note">
@@ -147,7 +148,7 @@ function VideoUpload({ apiUrl, mode, token, onUploadStart, onUploadSuccess, onUp
                 <polyline points="17 2 12 7 7 2"/>
               </svg>
             </span>
-            <span>For best event detection, upload a match video <strong>longer than 30 minutes</strong>.</span>
+            <span dangerouslySetInnerHTML={{ __html: t("upload.matchHint") }} />
           </div>
         )}
       </div>
@@ -179,8 +180,8 @@ function VideoUpload({ apiUrl, mode, token, onUploadStart, onUploadSuccess, onUp
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
               </svg>
             </div>
-            <h3>Drop your video here</h3>
-            <p className="muted">or click to browse from your device</p>
+            <h3>{t("upload.dropHere")}</h3>
+            <p className="muted">{t("upload.orBrowse")}</p>
             <div className="formats">
               <span className="format-pill">MP4</span>
               <span className="format-pill">MKV</span>
@@ -207,7 +208,7 @@ function VideoUpload({ apiUrl, mode, token, onUploadStart, onUploadSuccess, onUp
                 </svg>
               </div>
             </div>
-            <p className="hint">Click to choose a different file</p>
+            <p className="hint">{t("upload.clickDifferent")}</p>
           </>
         )}
       </div>
@@ -225,7 +226,7 @@ function VideoUpload({ apiUrl, mode, token, onUploadStart, onUploadSuccess, onUp
             {ctaLabel}
           </button>
           <button className="vu-btn-cancel" onClick={() => setFile(null)}>
-            Cancel
+            {t("upload.cancel")}
           </button>
         </div>
       )}
@@ -234,7 +235,7 @@ function VideoUpload({ apiUrl, mode, token, onUploadStart, onUploadSuccess, onUp
       {uploading && (
         <div className="upload-progress">
           <div className="progress-header">
-            <span className="progress-label">Uploading…</span>
+            <span className="progress-label">{t("upload.uploading")}</span>
             <span className={`progress-percent ${isTracking ? "progress-tracking" : ""}`}>
               {uploadProgress}%
             </span>

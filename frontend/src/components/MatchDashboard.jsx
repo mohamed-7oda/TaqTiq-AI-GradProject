@@ -816,8 +816,8 @@ export default function MatchDashboard({ results }) {
   const s2 = useMemo(() => getTeamStats(events, "Team 2"), [events]);
 
   const JERSEY_HEX = { red:"#cc2200",blue:"#1144cc",green:"#15803d",white:"#e2e8f0",black:"#334155",yellow:"#eab308",orange:"#f97316",purple:"#8b5cf6",pink:"#ec4899",gray:"#6b7280",grey:"#6b7280",navy:"#1e3a8a",maroon:"#991b1b",cyan:"#06b6d4",teal:"#0d9488" };
-  const c1 = "#ef4444";
-  const c2 = "#3b82f6";
+  const c1 = "#3b82f6";
+  const c2 = "#ef4444";
   const cleanName = (name) => name ? name.replace(/[^a-zA-Z\s]/g, "").trim() : "unknown";
   const n1 = cleanName(teamColors?.team1?.name);
   const n2 = cleanName(teamColors?.team2?.name);

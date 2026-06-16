@@ -1,5 +1,6 @@
 // frontend/src/components/ModeSelector.jsx
 import React from "react";
+import { useTranslation } from "react-i18next";
 import "./ModeSelector.css";
 
 const EventsIcon = () => (
@@ -17,18 +18,19 @@ const TrackingIcon = () => (
 );
 
 export default function ModeSelector({ mode, onChange }) {
+  const { t } = useTranslation();
   return (
     <div className="mode-selector">
-      <h2 className="mode-title">Choose Analysis Mode</h2>
+      <h2 className="mode-title">{t("mode.title")}</h2>
       <div className="mode-cards">
         <button
           className={`mode-card ${mode === "events" ? "active" : ""}`}
           onClick={() => onChange("events")}
         >
           <div className="mode-icon"><EventsIcon /></div>
-          <h3>Event Detection</h3>
-          <p>Detect goals, fouls, cards, corners and 13 other events with timestamps.</p>
-          <span className="mode-badge">AI-Powered · Instant Results</span>
+          <h3>{t("mode.events.title")}</h3>
+          <p>{t("mode.events.desc")}</p>
+          <span className="mode-badge">{t("mode.events.badge")}</span>
         </button>
 
         <button
@@ -36,9 +38,9 @@ export default function ModeSelector({ mode, onChange }) {
           onClick={() => onChange("tracking")}
         >
           <div className="mode-icon"><TrackingIcon /></div>
-          <h3>Tactical Tracking</h3>
-          <p>Track every player & ball, assign teams, measure speed, distance and possession.</p>
-          <span className="mode-badge">Real-Time · Annotated Video</span>
+          <h3>{t("mode.tracking.title")}</h3>
+          <p>{t("mode.tracking.desc")}</p>
+          <span className="mode-badge">{t("mode.tracking.badge")}</span>
         </button>
       </div>
     </div>

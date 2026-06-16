@@ -1,3 +1,32 @@
+/* ── Arabic font ──────────────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap');
+
+/* ── RTL support ─────────────────────────────────────────────────────────── */
+:root[lang="ar"] {
+  --font-family: 'Cairo', sans-serif;
+}
+:root[lang="ar"] body,
+:root[lang="ar"] input,
+:root[lang="ar"] textarea,
+:root[lang="ar"] select,
+:root[lang="ar"] button {
+  font-family: 'Cairo', sans-serif;
+}
+:root[lang="ar"] .topbar-nav { flex-direction: row-reverse; }
+:root[lang="ar"] .topbar-user { flex-direction: row-reverse; }
+:root[lang="ar"] .topbar-brand { flex-direction: row-reverse; }
+:root[lang="ar"] .form-label-row { flex-direction: row-reverse; }
+:root[lang="ar"] .auth-switch { direction: rtl; }
+:root[lang="ar"] .vu-note { direction: rtl; }
+:root[lang="ar"] .file-card { flex-direction: row-reverse; text-align: right; }
+:root[lang="ar"] .file-info { text-align: right; }
+:root[lang="ar"] .pb-stepper { flex-direction: row-reverse; }
+:root[lang="ar"] .pf-section-title { flex-direction: row-reverse; }
+:root[lang="ar"] .pf-banner { flex-direction: row-reverse; }
+:root[lang="ar"] .pf-banner-text { text-align: right; }
+:root[lang="ar"] .consent-label { flex-direction: row-reverse; align-items: flex-start; }
+:root[lang="ar"] .consent-points { padding-right: 1.25rem; padding-left: 0; }
+
 /* ── Design Tokens ─────────────────────────────────────────────────────────── */
 :root {
   --bg:          #0a0e1a;

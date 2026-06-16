@@ -1,8 +1,10 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../../context/AuthContext";
 
 export default function Login({ onSwitch, onForgot }) {
   const { login } = useAuth();
+  const { t } = useTranslation();
   const [email,    setEmail]    = useState("");
   const [password, setPassword] = useState("");
   const [error,    setError]    = useState("");
@@ -11,12 +13,12 @@ export default function Login({ onSwitch, onForgot }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    if (!email.trim() || !password) { setError("Please fill in all fields."); return; }
+    if (!email.trim() || !password) { setError(t("login.fillFields")); return; }
     setLoading(true);
     try {
       await login(email.trim().toLowerCase(), password);
     } catch (err) {
-      setError(err.response?.data?.error || "Login failed. Please try again.");
+      setError(err.response?.data?.error || t("login.failed"));
     } finally {
       setLoading(false);
     }
@@ -29,14 +31,14 @@ export default function Login({ onSwitch, onForgot }) {
           <img src="/logo.png" alt="TaqTiq AI" className="auth-logo-img" />
         </div>
 
-        <h2 className="auth-title">Welcome Back</h2>
-        <p className="auth-subtitle">Sign in to your TaqTiq AI account to continue.</p>
+        <h2 className="auth-title">{t("login.title")}</h2>
+        <p className="auth-subtitle">{t("login.subtitle")}</p>
 
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
-            <label className="form-label">Email address</label>
+            <label className="form-label">{t("login.email")}</label>
             <input
-              type="email" className="form-input" placeholder="you@example.com"
+              type="email" className="form-input" placeholder={t("login.emailPlaceholder")}
               value={email} onChange={e => setEmail(e.target.value)}
               autoComplete="email" disabled={loading}
             />
@@ -44,9 +46,9 @@ export default function Login({ onSwitch, onForgot }) {
 
           <div className="form-group">
             <div className="form-label-row">
-              <label className="form-label">Password</label>
+              <label className="form-label">{t("login.password")}</label>
               <button type="button" className="auth-forgot-link" onClick={onForgot}>
-                Forgot password?
+                {t("login.forgotPassword")}
               </button>
             </div>
             <input
@@ -59,14 +61,14 @@ export default function Login({ onSwitch, onForgot }) {
           {error && <div className="auth-error">{error}</div>}
 
           <button type="submit" className="auth-btn" disabled={loading}>
-            {loading ? <span className="btn-spinner" /> : "Sign In"}
+            {loading ? <span className="btn-spinner" /> : t("login.signIn")}
           </button>
         </form>
 
         <hr className="auth-divider" />
         <p className="auth-switch">
-          Don't have an account?{" "}
-          <button className="auth-link" onClick={onSwitch}>Create one</button>
+          {t("login.noAccount")}{" "}
+          <button className="auth-link" onClick={onSwitch}>{t("login.createOne")}</button>
         </p>
       </div>
     </div>

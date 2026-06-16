@@ -51,8 +51,8 @@ function TeamStatsMini({ events }) {
   evList.forEach(e => {
     if (e.team && e.team !== "Unknown" && e.team_color) colorMap[e.team] = e.team_color;
   });
-  const c1 = "#ef4444";
-  const c2 = "#3b82f6";
+  const c1 = "#3b82f6";
+  const c2 = "#ef4444";
 
   const teamStat = (teamName) => {
     const te = evList.filter(e => e.team === teamName);

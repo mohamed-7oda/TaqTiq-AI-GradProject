@@ -61,10 +61,10 @@ function EventCard({ event, index, onClick }) {
                 <span
                   className="event-team"
                   style={{
-                    background: event.team === "Team 1" ? "#ef4444" : "#3b82f6",
-                    borderColor: event.team === "Team 1" ? "#ef4444" : "#3b82f6",
+                    background: event.team === "Team 1" ? "#3b82f6" : "#ef4444",
+                    borderColor: event.team === "Team 1" ? "#3b82f6" : "#ef4444",
                     color: "#fff",
-                    boxShadow: event.team === "Team 1" ? "0 2px 8px rgba(239,68,68,0.35)" : "0 2px 8px rgba(59,130,246,0.35)",
+                    boxShadow: event.team === "Team 1" ? "0 2px 8px rgba(59,130,246,0.35)" : "0 2px 8px rgba(239,68,68,0.35)",
                   }}
                 >
                   <span

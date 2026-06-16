@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
 
@@ -19,6 +20,7 @@ function Field({ label, children, className = "" }) {
 
 export default function Profile() {
   const { user, token, refreshUser } = useAuth();
+  const { t } = useTranslation();
 
   const [form, setForm] = useState({
     fullName: "", phoneNumber: "", dateOfBirth: "",
@@ -66,10 +68,10 @@ export default function Profile() {
     e.preventDefault();
     setPwSuccess(""); setPwError("");
     if (pwForm.newPassword !== pwForm.confirmPassword) {
-      setPwError("New passwords do not match."); return;
+      setPwError(t("profile.passwordsNotMatch")); return;
     }
     if (pwForm.newPassword.length < 6) {
-      setPwError("New password must be at least 6 characters."); return;
+      setPwError(t("profile.passwordTooShort")); return;
     }
     setPwSaving(true);
     try {
@@ -77,10 +79,10 @@ export default function Profile() {
         { currentPassword: pwForm.currentPassword, newPassword: pwForm.newPassword },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setPwSuccess("Password changed successfully.");
+      setPwSuccess(t("profile.passwordChanged"));
       setPwForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
     } catch (err) {
-      setPwError(err.response?.data?.error || "Failed to change password.");
+      setPwError(err.response?.data?.error || t("profile.passwordFailed"));
     } finally {
       setPwSaving(false);
     }
@@ -89,16 +91,16 @@ export default function Profile() {
   const handleSave = async (e) => {
     e.preventDefault();
     setSuccess(""); setError("");
-    if (!form.fullName.trim()) { setError("Full name is required."); return; }
+    if (!form.fullName.trim()) { setError(t("profile.fullNameRequired")); return; }
     setSaving(true);
     try {
       await axios.put(`${API_URL}/api/profile`, form, {
         headers: { Authorization: `Bearer ${token}` },
       });
       await refreshUser();
-      setSuccess("Profile saved successfully.");
+      setSuccess(t("profile.savedSuccess"));
     } catch (err) {
-      setError(err.response?.data?.error || "Failed to save profile.");
+      setError(err.response?.data?.error || t("profile.saveFailed"));
     } finally {
       setSaving(false);
     }
@@ -135,13 +137,13 @@ export default function Profile() {
       <form onSubmit={handleSave} className="pf-form">
 
         <section className="pf-section pf-section-account">
-          <h3 className="pf-section-title">Account</h3>
+          <h3 className="pf-section-title">{t("profile.account")}</h3>
           <div className="pf-grid-2">
-            <Field label="Full Name">
+            <Field label={t("profile.fullName")}>
               <input className="pf-input" value={form.fullName}
-                onChange={set("fullName")} placeholder="Your full name" />
+                onChange={set("fullName")} placeholder={t("profile.fullNamePlaceholder")} />
             </Field>
-            <Field label="Email">
+            <Field label={t("profile.email")}>
               <input className="pf-input pf-readonly" value={user?.email || ""}
                 readOnly tabIndex={-1} />
             </Field>
@@ -149,48 +151,48 @@ export default function Profile() {
         </section>
 
         <section className="pf-section pf-section-personal">
-          <h3 className="pf-section-title">Personal Information</h3>
+          <h3 className="pf-section-title">{t("profile.personalInfo")}</h3>
           <div className="pf-grid-2">
-            <Field label="Phone Number">
+            <Field label={t("profile.phoneNumber")}>
               <input className="pf-input" value={form.phoneNumber}
-                onChange={set("phoneNumber")} placeholder="+20 123 456 7890"
+                onChange={set("phoneNumber")} placeholder={t("profile.phonePlaceholder")}
                 type="tel" />
             </Field>
-            <Field label="Date of Birth">
+            <Field label={t("profile.dateOfBirth")}>
               <input className="pf-input" value={form.dateOfBirth}
                 onChange={set("dateOfBirth")} type="date" />
             </Field>
-            <Field label="Country">
+            <Field label={t("profile.country")}>
               <input className="pf-input" value={form.country}
-                onChange={set("country")} placeholder="Egypt" />
+                onChange={set("country")} placeholder={t("profile.countryPlaceholder")} />
             </Field>
-            <Field label="City">
+            <Field label={t("profile.city")}>
               <input className="pf-input" value={form.city}
-                onChange={set("city")} placeholder="Cairo" />
+                onChange={set("city")} placeholder={t("profile.cityPlaceholder")} />
             </Field>
           </div>
         </section>
 
         <section className="pf-section pf-section-professional">
-          <h3 className="pf-section-title">Professional</h3>
+          <h3 className="pf-section-title">{t("profile.professional")}</h3>
           <div className="pf-grid-2">
-            <Field label="Organization">
+            <Field label={t("profile.organization")}>
               <input className="pf-input" value={form.organization}
                 onChange={set("organization")}
-                placeholder="Club / University / Company" />
+                placeholder={t("profile.orgPlaceholder")} />
             </Field>
-            <Field label="Role">
+            <Field label={t("profile.role")}>
               <select className="pf-input pf-select" value={form.role}
                 onChange={set("role")}>
                 {ROLE_OPTIONS.map((r) => (
-                  <option key={r} value={r}>{r || "Select role…"}</option>
+                  <option key={r} value={r}>{r || t("profile.selectRole")}</option>
                 ))}
               </select>
             </Field>
-            <Field label="Bio" className="pf-field-full">
+            <Field label={t("profile.bio")} className="pf-field-full">
               <textarea className="pf-input pf-textarea" value={form.bio}
                 onChange={set("bio")}
-                placeholder="A short description about yourself…"
+                placeholder={t("profile.bioPlaceholder")}
                 rows={3} />
             </Field>
           </div>
@@ -200,30 +202,30 @@ export default function Profile() {
         {success && <div className="pf-msg pf-msg-success">{success}</div>}
 
         <button type="submit" className="pf-save-btn" disabled={saving}>
-          {saving ? <span className="btn-spinner" /> : "Save Changes"}
+          {saving ? <span className="btn-spinner" /> : t("profile.saveChanges")}
         </button>
       </form>
 
       {/* ── Security / Change password form ── */}
       <form onSubmit={handleChangePassword} className="pf-form pf-pw-form">
         <section className="pf-section pf-section-security">
-          <h3 className="pf-section-title">Security</h3>
+          <h3 className="pf-section-title">{t("profile.security")}</h3>
 
-          <Field label="Current Password" className="pf-field-current-pw">
+          <Field label={t("profile.currentPassword")} className="pf-field-current-pw">
             <input className="pf-input" type="password" value={pwForm.currentPassword}
-              onChange={setPw("currentPassword")} placeholder="Enter current password"
+              onChange={setPw("currentPassword")} placeholder={t("profile.currentPasswordPlaceholder")}
               autoComplete="current-password" />
           </Field>
 
           <div className="pf-grid-2 pf-grid-pw">
-            <Field label="New Password">
+            <Field label={t("profile.newPassword")}>
               <input className="pf-input" type="password" value={pwForm.newPassword}
-                onChange={setPw("newPassword")} placeholder="At least 6 characters"
+                onChange={setPw("newPassword")} placeholder={t("profile.newPasswordPlaceholder")}
                 autoComplete="new-password" />
             </Field>
-            <Field label="Confirm New Password">
+            <Field label={t("profile.confirmNewPassword")}>
               <input className="pf-input" type="password" value={pwForm.confirmPassword}
-                onChange={setPw("confirmPassword")} placeholder="Repeat new password"
+                onChange={setPw("confirmPassword")} placeholder={t("profile.confirmNewPasswordPlaceholder")}
                 autoComplete="new-password" />
             </Field>
           </div>
@@ -233,7 +235,7 @@ export default function Profile() {
         </section>
 
         <button type="submit" className="pf-save-btn" disabled={pwSaving}>
-          {pwSaving ? <span className="btn-spinner" /> : "Change Password"}
+          {pwSaving ? <span className="btn-spinner" /> : t("profile.changePassword")}
         </button>
       </form>
 

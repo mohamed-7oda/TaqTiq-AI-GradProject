@@ -1,44 +1,45 @@
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import axios from "axios";
 
-// ── Event-detection stages ────────────────────────────────────────────────────
-const EVENT_STAGES = [
-  { key: "queued",          icon: "📋", title: "Queued",             desc: "Your video is in the queue and will start shortly." },
-  { key: "extracting",      icon: "🎬", title: "Analysing Video",    desc: "Reading and processing your video frames — this may take a few minutes." },
-  { key: "inferring",       icon: "🧠", title: "Detecting Events",   desc: "Our AI is identifying goals, fouls, cards, corners and more." },
-  { key: "team_colors",     icon: "🎨", title: "Identifying Teams",  desc: "Detecting jersey colours and assigning team identities." },
-  { key: "team_attribution",icon: "👥", title: "Attributing Events", desc: "Linking each detected event to the correct team." },
-  { key: "completed",       icon: "✅", title: "Analysis Complete",  desc: "All events detected and ready to explore." },
-];
-
-const EVENT_STEPPER = [
-  { keys: ["queued"],                        label: "Queued"    },
-  { keys: ["extracting"],                    label: "Analysing" },
-  { keys: ["inferring"],                     label: "Detecting" },
-  { keys: ["team_colors","team_attribution"],label: "Teams"     },
-  { keys: ["completed"],                     label: "Complete"  },
-];
-
-// ── Player-tracking stages ────────────────────────────────────────────────────
-const TRACKING_STAGES = [
-  { key: "queued",    icon: "📋", title: "Queued",              desc: "Your video is in the queue and will start shortly." },
-  { key: "detecting", icon: "🎯", title: "Detecting Players",   desc: "Running YOLO to locate every player, ball and referee on the pitch." },
-  { key: "processing",icon: "⚙️", title: "Processing Movement", desc: "Estimating camera movement, transforming positions and calculating team assignments." },
-  { key: "rendering", icon: "🎬", title: "Rendering Output",    desc: "Drawing player annotations, overlays and generating the match report." },
-  { key: "encoding",  icon: "💾", title: "Encoding Video",      desc: "Encoding the annotated video for smooth browser playback." },
-  { key: "done",      icon: "✅", title: "Tracking Complete",   desc: "Your tracked video and match report are ready." },
-  { key: "completed", icon: "✅", title: "Tracking Complete",   desc: "Your tracked video and match report are ready." },
-];
-
-const TRACKING_STEPPER = [
-  { keys: ["queued"],              label: "Queued"     },
-  { keys: ["detecting"],           label: "Detecting"  },
-  { keys: ["processing"],          label: "Processing" },
-  { keys: ["rendering","encoding"],label: "Rendering"  },
-  { keys: ["done","completed"],    label: "Complete"   },
-];
-
 export default function ProgressBar({ apiUrl, jobId, mode, jobStartedAt, onStatusUpdate, onComplete, onFailed }) {
+  const { t } = useTranslation();
+
+  const EVENT_STAGES = [
+    { key: "queued",           icon: "📋", title: t("progress.stage.queued.title"),           desc: t("progress.stage.queued.desc") },
+    { key: "extracting",       icon: "🎬", title: t("progress.stage.extracting.title"),       desc: t("progress.stage.extracting.desc") },
+    { key: "inferring",        icon: "🧠", title: t("progress.stage.inferring.title"),        desc: t("progress.stage.inferring.desc") },
+    { key: "team_colors",      icon: "🎨", title: t("progress.stage.team_colors.title"),      desc: t("progress.stage.team_colors.desc") },
+    { key: "team_attribution", icon: "👥", title: t("progress.stage.team_attribution.title"), desc: t("progress.stage.team_attribution.desc") },
+    { key: "completed",        icon: "✅", title: t("progress.stage.completed.title"),        desc: t("progress.stage.completed.desc") },
+  ];
+
+  const EVENT_STEPPER = [
+    { keys: ["queued"],                         label: t("progress.stepper.queued")    },
+    { keys: ["extracting"],                     label: t("progress.stepper.analysing") },
+    { keys: ["inferring"],                      label: t("progress.stepper.detecting") },
+    { keys: ["team_colors","team_attribution"], label: t("progress.stepper.teams")     },
+    { keys: ["completed"],                      label: t("progress.stepper.complete")  },
+  ];
+
+  const TRACKING_STAGES = [
+    { key: "queued",     icon: "📋", title: t("progress.tracking.queued.title"),      desc: t("progress.tracking.queued.desc") },
+    { key: "detecting",  icon: "🎯", title: t("progress.tracking.detecting.title"),   desc: t("progress.tracking.detecting.desc") },
+    { key: "processing", icon: "⚙️", title: t("progress.tracking.processing.title"),  desc: t("progress.tracking.processing.desc") },
+    { key: "rendering",  icon: "🎬", title: t("progress.tracking.rendering.title"),   desc: t("progress.tracking.rendering.desc") },
+    { key: "encoding",   icon: "💾", title: t("progress.tracking.encoding.title"),    desc: t("progress.tracking.encoding.desc") },
+    { key: "done",       icon: "✅", title: t("progress.tracking.done.title"),        desc: t("progress.tracking.done.desc") },
+    { key: "completed",  icon: "✅", title: t("progress.tracking.done.title"),        desc: t("progress.tracking.done.desc") },
+  ];
+
+  const TRACKING_STEPPER = [
+    { keys: ["queued"],               label: t("progress.stepper.queued")     },
+    { keys: ["detecting"],            label: t("progress.stepper.detecting")  },
+    { keys: ["processing"],           label: t("progress.stepper.processing") },
+    { keys: ["rendering","encoding"], label: t("progress.stepper.rendering")  },
+    { keys: ["done","completed"],     label: t("progress.stepper.complete")   },
+  ];
+
   const STAGES  = mode === "tracking" ? TRACKING_STAGES  : EVENT_STAGES;
   const STEPPER = mode === "tracking" ? TRACKING_STEPPER : EVENT_STEPPER;
   const [stage,      setStage]      = useState("queued");
@@ -107,7 +108,7 @@ export default function ProgressBar({ apiUrl, jobId, mode, jobStartedAt, onStatu
       {/* Elapsed time */}
       <div className="pb-timer">
         <div className="pb-timer-row">
-          <span className="pb-timer-label">Elapsed Time</span>
+          <span className="pb-timer-label">{t("progress.elapsedTime")}</span>
           <span className="pb-timer-val">{fmt(elapsedSec)}</span>
         </div>
         <div className="pb-timer-bar">
@@ -146,7 +147,7 @@ export default function ProgressBar({ apiUrl, jobId, mode, jobStartedAt, onStatu
 
       {/* Job ID */}
       <div className="pb-jobid">
-        <span className="pb-jobid-label">Job ID</span>
+        <span className="pb-jobid-label">{t("progress.jobId")}</span>
         <code className="pb-jobid-val">{jobId}</code>
       </div>
 

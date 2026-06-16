@@ -1,16 +1,18 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import axios from "axios";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 export default function ForgotPassword({ onBack }) {
+  const { t } = useTranslation();
   const [email,   setEmail]   = useState("");
   const [status,  setStatus]  = useState("idle");
   const [message, setMessage] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!email.trim()) { setStatus("error"); setMessage("Please enter your email address."); return; }
+    if (!email.trim()) { setStatus("error"); setMessage(t("forgot.emailRequired")); return; }
     setStatus("loading");
     setMessage("");
     try {
@@ -19,7 +21,7 @@ export default function ForgotPassword({ onBack }) {
       setMessage(res.data.message);
     } catch (err) {
       setStatus("error");
-      setMessage(err.response?.data?.error || "Something went wrong. Please try again.");
+      setMessage(err.response?.data?.error || t("forgot.error"));
     }
   };
 
@@ -30,36 +32,36 @@ export default function ForgotPassword({ onBack }) {
           <img src="/logo.png" alt="TaqTiq AI" className="auth-logo-img" />
         </div>
 
-        <h2 className="auth-title">Forgot password?</h2>
-        <p className="auth-subtitle">Enter your email and we'll send you a reset link.</p>
+        <h2 className="auth-title">{t("forgot.title")}</h2>
+        <p className="auth-subtitle">{t("forgot.subtitle")}</p>
 
         {status === "success" ? (
           <div style={{ textAlign: "center", padding: "1.5rem 0" }}>
             <div style={{ fontSize: "2.5rem", marginBottom: "0.75rem" }}>✉️</div>
             <div className="auth-success" style={{ marginBottom: "0.5rem" }}>{message}</div>
             <p style={{ color: "var(--text-dim)", fontSize: "0.82rem", marginTop: "0.5rem" }}>
-              Check your inbox (and spam folder) for the reset link.
+              {t("forgot.checkInbox")}
             </p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="auth-form">
             <div className="form-group">
-              <label className="form-label">Email address</label>
+              <label className="form-label">{t("login.email")}</label>
               <input
-                type="email" className="form-input" placeholder="you@example.com"
+                type="email" className="form-input" placeholder={t("login.emailPlaceholder")}
                 value={email} onChange={e => setEmail(e.target.value)}
                 autoComplete="email" disabled={status === "loading"}
               />
             </div>
             {status === "error" && <div className="auth-error">{message}</div>}
             <button type="submit" className="auth-btn" disabled={status === "loading"}>
-              {status === "loading" ? <span className="btn-spinner" /> : "Send Reset Link"}
+              {status === "loading" ? <span className="btn-spinner" /> : t("forgot.sendLink")}
             </button>
           </form>
         )}
 
         <p className="auth-switch" style={{ marginTop: "1.5rem" }}>
-          <button className="auth-link" onClick={onBack}>← Back to Sign In</button>
+          <button className="auth-link" onClick={onBack}>{t("forgot.backToSignIn")}</button>
         </p>
       </div>
     </div>

@@ -9,12 +9,12 @@
 
 ## Team Members
 
-| Name | ID | Program |
-|---|---|---|
-| Mohamed Mahmoud Emam | 202202236 | Data Science & Artificial Intelligence |
-| Seif Aboshanab | 202201838 | Data Science & Artificial Intelligence |
-| Mohamed Ahmed Bekheet | 202201714 | Data Science & Artificial Intelligence |
-| Mostafa Mahmoud Mohamed | 202201962 | Data Science & Artificial Intelligence |
+| Name | Program |
+|---|---|
+| Mohamed Mahmoud Emam | Data Science & Artificial Intelligence |
+| Seif Aboshanab | Data Science & Artificial Intelligence |
+| Mohamed Ahmed Bekheet | Data Science & Artificial Intelligence |
+| Mostafa Mahmoud Mohamed | Data Science & Artificial Intelligence |
 
 **University:** Zewail City of Science and Technology  
 **Faculty:** Faculty of Computer Science  
